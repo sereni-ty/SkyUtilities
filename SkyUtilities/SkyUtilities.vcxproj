@@ -55,9 +55,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUMisc.psc" />
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUNet.psc" />
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUStorage.psc" />
+    <None Include="Papyrus Exports\SKUNet.psc" />
     <None Include="Request.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

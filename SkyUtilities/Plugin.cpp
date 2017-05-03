@@ -27,7 +27,7 @@ namespace SKU {
 
 	Plugin::~Plugin()
 	{
-		Plugin::Log(LOGL_VERBOSE, "Stopping Interfaces: "); // TODO: Why does this NOT get called?
+		Plugin::Log(LOGL_VERBOSE, "Stopping Interfaces: ");
 
 		Plugin::Log(LOGL_VERBOSE, " - Net");
 		Net::Interface::GetInstance()->Stop();

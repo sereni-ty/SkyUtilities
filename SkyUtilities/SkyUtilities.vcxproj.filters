@@ -67,17 +67,11 @@
     <ClCompile Include="Plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUNet.psc">
-      <Filter>Papyrus Scripts</Filter>
-    </None>
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUMisc.psc">
-      <Filter>Papyrus Scripts</Filter>
-    </None>
-    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUStorage.psc">
-      <Filter>Papyrus Scripts</Filter>
-    </None>
     <None Include="Request.inl">
       <Filter>Net</Filter>
+    </None>
+    <None Include="Papyrus Exports\SKUNet.psc">
+      <Filter>Papyrus Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>
