@@ -11,6 +11,9 @@
     <Filter Include="Net">
       <UniqueIdentifier>{89708f6a-4c78-49f1-95c5-b9b23592f7d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Net\HTTP">
+      <UniqueIdentifier>{6cb04ecb-445f-4ded-b599-2bdf7d6c794b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Singleton.h">
@@ -19,59 +22,59 @@
     <ClInclude Include="Events.h">
       <Filter>Internal</Filter>
     </ClInclude>
-    <ClInclude Include="NetInterface.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="RequestPool.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="Request.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="RequestProtocolContext.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="HTTPRequestProtocolContext.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="HTTPRequestManager.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="RequestManagerBase.h">
-      <Filter>Net</Filter>
-    </ClInclude>
     <ClInclude Include="Lockable.h">
       <Filter>Internal</Filter>
     </ClInclude>
     <ClInclude Include="Plugin.h" />
+    <ClInclude Include="Net\Request.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\RequestManagerBase.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\RequestPool.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\RequestProtocolContext.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\HTTP\RequestManager.h">
+      <Filter>Net\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\HTTP\RequestProtocolContext.h">
+      <Filter>Net\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\Interface.h">
+      <Filter>Net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NetInterface.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="Request.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="RequestPool.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="HTTPRequestProtocolContext.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="HTTPRequestManager.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="RequestManagerBase.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
     <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="Net\Request.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\RequestManagerBase.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\RequestPool.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\HTTP\RequestManager.cpp">
+      <Filter>Net\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp">
+      <Filter>Net\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\Interface.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Request.inl">
-      <Filter>Net</Filter>
-    </None>
     <None Include="Papyrus Exports\SKUNet.psc">
       <Filter>Papyrus Scripts</Filter>
+    </None>
+    <None Include="Net\Request.inl">
+      <Filter>Net</Filter>
     </None>
   </ItemGroup>
 </Project>

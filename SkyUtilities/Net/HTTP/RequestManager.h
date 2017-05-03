@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Singleton.h"
-#include "RequestManagerBase.h"
+#include "Net/RequestManagerBase.h"
 
 #include <thread>
 #include <future>

@@ -1,8 +1,8 @@
 #include "Plugin.h"
-#include "NetInterface.h"
-#include "Request.h"
-#include "HTTPRequestProtocolContext.h"
-#include "HTTPRequestManager.h"
+#include "Net/Interface.h"
+#include "Net/Request.h"
+#include "Net/HTTP/RequestProtocolContext.h"
+#include "Net/HTTP/RequestManager.h"
 
 #include <skse/PapyrusNativeFunctions.h>
 

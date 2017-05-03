@@ -3,7 +3,7 @@
 #include "Singleton.h"
 #include "Events.h"
 
-#include "HTTPRequestProtocolContext.h"
+#include "Net/HTTP/RequestProtocolContext.h"
 
 struct StaticFunctionTag;
 

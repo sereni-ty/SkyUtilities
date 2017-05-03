@@ -1,5 +1,5 @@
-#include "HTTPRequestProtocolContext.h"
-#include "HTTPRequestManager.h"
+#include "Net/HTTP/RequestProtocolContext.h"
+#include "Net/HTTP/RequestManager.h"
 #include "Plugin.h"
 
 #include <exception>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Request.h"
+#include "Net/Request.h"
 
 #include <set>
 #include <initializer_list>

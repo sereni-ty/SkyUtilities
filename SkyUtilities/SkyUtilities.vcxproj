@@ -20,31 +20,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Events.h" />
-    <ClInclude Include="HTTPRequestManager.h" />
-    <ClInclude Include="HTTPRequestProtocolContext.h" />
     <ClInclude Include="Lockable.h" />
+    <ClInclude Include="Net\HTTP\RequestManager.h" />
+    <ClInclude Include="Net\HTTP\RequestProtocolContext.h" />
+    <ClInclude Include="Net\Interface.h" />
+    <ClInclude Include="Net\Request.h" />
+    <ClInclude Include="Net\RequestManagerBase.h" />
+    <ClInclude Include="Net\RequestPool.h" />
+    <ClInclude Include="Net\RequestProtocolContext.h" />
     <ClInclude Include="Plugin.h" />
-    <ClInclude Include="NetInterface.h" />
-    <ClInclude Include="Request.h" />
-    <ClInclude Include="RequestManagerBase.h" />
-    <ClInclude Include="RequestPool.h" />
-    <ClInclude Include="RequestProtocolContext.h" />
     <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HTTPRequestManager.cpp" />
-    <ClCompile Include="HTTPRequestProtocolContext.cpp" />
-    <ClCompile Include="NetInterface.cpp" />
+    <ClCompile Include="Net\HTTP\RequestManager.cpp" />
+    <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp" />
+    <ClCompile Include="Net\Interface.cpp" />
+    <ClCompile Include="Net\Request.cpp" />
+    <ClCompile Include="Net\RequestManagerBase.cpp" />
+    <ClCompile Include="Net\RequestPool.cpp" />
     <ClCompile Include="Plugin.cpp" />
-    <ClCompile Include="Request.cpp">
-      <FileType>Document</FileType>
-    </ClCompile>
-    <ClCompile Include="RequestManagerBase.cpp" />
-    <ClCompile Include="RequestPool.cpp">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Libraries\SKSE\common\common.vcxproj">
@@ -55,8 +49,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Net\Request.inl" />
     <None Include="Papyrus Exports\SKUNet.psc" />
-    <None Include="Request.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -109,7 +103,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>E:\dev\projects\Skyrim\SKSE\SkyUtilities\SkyUtilities\SkyUtilities;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>

@@ -1,7 +1,7 @@
-#include "HTTPRequestManager.h"
-#include "HTTPRequestProtocolContext.h"
+#include "Net/HTTP/RequestManager.h"
+#include "Net/HTTP/RequestProtocolContext.h"
 
-#include "NetInterface.h"
+#include "Net/Interface.h"
 
 #include "Plugin.h"
 

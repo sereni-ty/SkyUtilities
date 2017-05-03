@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Singleton.h"
-#include "RequestPool.h"
+#include "Net/RequestPool.h"
 
 namespace SKU { namespace Net {
 

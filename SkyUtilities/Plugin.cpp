@@ -1,6 +1,6 @@
 #include "Plugin.h"
 
-#include "NetInterface.h"
+#include "Net/Interface.h"
 
 #include <common/IDebugLog.h>
 #include <skse/PluginAPI.h>
