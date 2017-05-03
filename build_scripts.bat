@@ -9,7 +9,7 @@
 @mkdir "Release\Scripts" 2>nul
 @del /Q /F "Release\Scripts\*" 2>nul
 
-for %%i in ("%LIBS%\SkyUtilities\*") do (
+for %%i in ("SkyUtilities\Papyrus Exports\*") do (
 	@echo PapyrusCompiler "%%i" -i="%PPF_SCRIPTS%" -o="Release\Scripts" -f="%PPF_FLAGS%"
 	PapyrusCompiler "%%i" -i="%PPF_SCRIPTS%" -o="Release\Scripts" -f="%PPF_FLAGS%"
 
