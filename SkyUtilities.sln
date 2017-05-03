@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.26206.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkyUtilities", "SkyUtilities\SkyUtilities.vcxproj", "{D8F23A6F-80AB-4DE1-9131-F9FE53168687}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "..\..\..\Libraries\SKSE\common\common.vcxproj", "{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skse", "..\..\..\Libraries\SKSE\skse\skse\skse.vcxproj", "{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +25,18 @@ Global
 		{D8F23A6F-80AB-4DE1-9131-F9FE53168687}.Release|x64.Build.0 = Release|x64
 		{D8F23A6F-80AB-4DE1-9131-F9FE53168687}.Release|x86.ActiveCfg = Release|Win32
 		{D8F23A6F-80AB-4DE1-9131-F9FE53168687}.Release|x86.Build.0 = Release|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Debug|x64.ActiveCfg = Debug|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Debug|x86.ActiveCfg = Debug|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Debug|x86.Build.0 = Debug|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Release|x64.ActiveCfg = Release|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Release|x86.ActiveCfg = Release|Win32
+		{20C6411C-596F-4B85-BE4E-8BC91F59D8A6}.Release|x86.Build.0 = Release|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Debug|x64.ActiveCfg = Debug|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Debug|x86.ActiveCfg = Debug|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Debug|x86.Build.0 = Debug|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Release|x64.ActiveCfg = Release|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Release|x86.ActiveCfg = Release|Win32
+		{AA0365EC-47EA-45AA-BB1F-EBBCCCC466F2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

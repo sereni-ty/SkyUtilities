@@ -1,17 +1,83 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Quelldateien">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Headerdateien">
+    <Filter Include="Internal">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Ressourcendateien">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Papyrus Scripts">
+      <UniqueIdentifier>{7d58ee2e-77aa-4ea1-8a9b-c6d55193f6fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Net">
+      <UniqueIdentifier>{89708f6a-4c78-49f1-95c5-b9b23592f7d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Singleton.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Events.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="NetInterface.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestPool.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Request.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestProtocolContext.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPRequestProtocolContext.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPRequestManager.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestManagerBase.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lockable.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Plugin.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="NetInterface.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Request.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestPool.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPRequestProtocolContext.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPRequestManager.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestManagerBase.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Plugin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUNet.psc">
+      <Filter>Papyrus Scripts</Filter>
+    </None>
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUMisc.psc">
+      <Filter>Papyrus Scripts</Filter>
+    </None>
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUStorage.psc">
+      <Filter>Papyrus Scripts</Filter>
+    </None>
+    <None Include="Request.inl">
+      <Filter>Net</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -18,6 +18,48 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Events.h" />
+    <ClInclude Include="HTTPRequestManager.h" />
+    <ClInclude Include="HTTPRequestProtocolContext.h" />
+    <ClInclude Include="Lockable.h" />
+    <ClInclude Include="Plugin.h" />
+    <ClInclude Include="NetInterface.h" />
+    <ClInclude Include="Request.h" />
+    <ClInclude Include="RequestManagerBase.h" />
+    <ClInclude Include="RequestPool.h" />
+    <ClInclude Include="RequestProtocolContext.h" />
+    <ClInclude Include="Singleton.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="HTTPRequestManager.cpp" />
+    <ClCompile Include="HTTPRequestProtocolContext.cpp" />
+    <ClCompile Include="NetInterface.cpp" />
+    <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="Request.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="RequestManagerBase.cpp" />
+    <ClCompile Include="RequestPool.cpp">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Libraries\SKSE\common\common.vcxproj">
+      <Project>{20c6411c-596f-4b85-be4e-8bc91f59d8a6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Libraries\SKSE\skse\skse\skse.vcxproj">
+      <Project>{aa0365ec-47ea-45aa-bb1f-ebbcccc466f2}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUMisc.psc" />
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUNet.psc" />
+    <None Include="..\..\..\..\Libraries\Papyrus\SkyUtilities\SKUStorage.psc" />
+    <None Include="Request.inl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D8F23A6F-80AB-4DE1-9131-F9FE53168687}</ProjectGuid>
@@ -26,7 +68,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -75,7 +117,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>E:\dev\projects\Libraries\curl-7.54.0\builds\libcurl-vc14-x86-release-dll-ssl-dll-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>common/IPrefix.h</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)mo_install.bat" $(TargetedSDKConfiguration)</Command>
+      <Message>Installing (Mod Organizer)..</Message>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>E:\dev\projects\Libraries\curl-7.54.0\builds\libcurl-vc14-x86-release-dll-ssl-dll-ipv6-sspi\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -91,6 +144,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -110,8 +164,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
