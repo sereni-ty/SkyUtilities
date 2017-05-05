@@ -28,10 +28,12 @@
     <ClInclude Include="Net\RequestManagerBase.h" />
     <ClInclude Include="Net\RequestPool.h" />
     <ClInclude Include="Net\RequestProtocolContext.h" />
+    <ClInclude Include="PapyrusEvents.h" />
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="PapyrusEvents.cpp" />
     <ClCompile Include="Net\HTTP\RequestManager.cpp" />
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp" />
     <ClCompile Include="Net\Interface.cpp" />
@@ -111,17 +113,19 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>E:\dev\projects\Libraries\curl-7.54.0\builds\libcurl-vc14-x86-release-dll-ssl-dll-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\dev\projects\Libraries\boost_1_63_0;E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-release-dll-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>common/IPrefix.h</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Command>"$(SolutionDir)mo_install.bat" $(TargetedSDKConfiguration)</Command>
       <Message>Installing (Mod Organizer)..</Message>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>E:\dev\projects\Libraries\curl-7.54.0\builds\libcurl-vc14-x86-release-dll-ssl-dll-ipv6-sspi\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-release-dll-ipv6-sspi\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcurl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

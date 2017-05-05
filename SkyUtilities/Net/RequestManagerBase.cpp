@@ -30,4 +30,14 @@ namespace SKU { namespace Net {
 		catch (std::exception){}
 	}
 
+	Request::Ptr RequestManagerBase::GetRequestByID(unsigned request_id)
+	{
+		try
+		{
+			return pool.GetRequestByID(request_id);
+		}
+		catch(std::exception){}
+
+		return nullptr;
+	}
 }}

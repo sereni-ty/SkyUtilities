@@ -4,6 +4,7 @@
 #include "Net/Interface.h"
 
 #include "Plugin.h"
+#include "PapyrusEvents.h"
 
 #include <mutex>
 
@@ -340,8 +341,8 @@ namespace SKU { namespace Net { namespace HTTP {
 			
 			Request::Ptr &request = fnGetRequestByHandle(info->easy_handle, requests);
 
-			if (request == nullptr) // Request not found. TODO: Request state was changed? Check that.
-			{
+			if (request == nullptr) // Request not found. 
+			{						// TODO: Request state was changed? Check that.
 				Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Request was answered but (internally) not found.");
 
 				curl_easy_cleanup(info->easy_handle); // Let the dead rest.				
@@ -364,6 +365,14 @@ namespace SKU { namespace Net { namespace HTTP {
 				info->data.result,
 				info->data.result == CURLE_OK ? "finished successfully" : "failed");
 
+			if (info->data.result == CURLE_OK)
+			{
+				PapyrusEvent(Interface::GetEventString(Interface::evRequestFinished))
+					.SetArgument((long)request->GetID())
+					.SetArgument(ctx->response)
+					.Send();
+			}
+
 			request->Unlock();
 
 			if (curl_last_error != CURLM_OK)
@@ -384,7 +393,7 @@ namespace SKU { namespace Net { namespace HTTP {
 
 		Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) was answered with %d bytes.", (int)request_id, size*nmemb);
 
-		request->GetProtocolContext<RequestProtocolContext>()->body.append(data, size*nmemb);
+		request->GetProtocolContext<RequestProtocolContext>()->response.append(data, size*nmemb);
 
 		return size*nmemb;
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 namespace SKU { namespace Net {
 	
@@ -21,6 +22,12 @@ namespace SKU { namespace Net {
 		public:
 			virtual void Initialize() {};
 			virtual void Cleanup() {};
+
+		public:
+			virtual std::string GetResponse() { return response; }
+
+		protected:
+			std::string response;
 
 		private:
 			std::shared_ptr<Request> owner;

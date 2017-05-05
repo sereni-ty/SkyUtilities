@@ -10,6 +10,7 @@ namespace SKU { namespace Net {
 		public:
 			bool AddRequest(Request::Ptr request, bool proccess_immediately = false);
 			virtual void RemoveRequest(Request::Ptr request);
+			Request::Ptr GetRequestByID(unsigned request_id);
 
 		public:
 			virtual void Stop() = 0;

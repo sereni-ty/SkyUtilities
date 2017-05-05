@@ -10,6 +10,7 @@
 #include <shlobj.h>
 
 #include <mutex>
+#include <list>
 
 // TODO: create test classes to test if TEST macro is set just after "game ready" has been set
 
@@ -18,31 +19,49 @@ namespace SKU {
 	Plugin::Plugin()
 		: is_game_ready(false), is_plugin_active(true)
 	{
-		gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
-
-		Plugin::Log(LOGL_INFO, "%s (%s) is initializing.", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
-
-		event_handler_set.insert(Net::Interface::GetInstance());
+		Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
 	}
 
 	Plugin::~Plugin()
 	{
-		Plugin::Log(LOGL_VERBOSE, "Stopping Interfaces: ");
+		Stop();
 
-		Plugin::Log(LOGL_VERBOSE, " - Net");
-		Net::Interface::GetInstance()->Stop();
+		Log(LOGL_INFO, "Plugin stopped.");
+	}
 
-		Plugin::Log(LOGL_INFO, "Plugin stopped.");
+	bool Plugin::Initialize()
+	{
+		Log(LOGL_INFO, "Initializing.");
+
+		//
+		// Event handler
+		event_handler_set.insert(Net::Interface::GetInstance());
+
+		return true;
+	}
+
+	void Plugin::Stop()
+	{
+		if (is_plugin_active == false)
+			return;
+
+		is_plugin_active = false;
+
+		event_handler_set.clear();
+
+		Log(LOGL_VERBOSE, "Stopping Interfaces: ");
+		Log(LOGL_VERBOSE, " - Net");
+		Net::Interface::GetInstance()->Stop();		
 	}
 
 	bool Plugin::OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info)
 	{
-		if (!skse || !info)
+		if (skse == nullptr || info == nullptr)
 			return false;
-
+		
 		if (skse->runtimeVersion < RUNTIME_VERSION_1_9_32_0)
 		{
-			Plugin::Log(LOGL_INFO, "SKSE version is below 1.9.32.0. Get at least that version or a newer one. Stopping plugin.");
+			Log(LOGL_INFO, "SKSE version is below 1.9.32.0. Get at least that version or a newer one. Stopping plugin.");
 			return false;
 		}
 
@@ -55,16 +74,16 @@ namespace SKU {
 
 	bool Plugin::OnSKSELoad(const SKSEInterface *skse)
 	{
-		if (!skse)
+		if (skse == nullptr)
 			return false;
 
 		SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
 		SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
 
-		if (!skse_papyrus || !skse_messaging)
+		if (skse_papyrus == nullptr || skse_messaging == nullptr)
 		{
-			Plugin::Log(LOGL_INFO, "SKSE failed to return valid interfaces. Stopping plugin.");
-			Plugin::Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s", 
+			Log(LOGL_INFO, "SKSE failed to return valid interfaces. Stopping plugin.");
+			Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s", 
 				(skse_papyrus ? "valid" : "invalid"),
 				(skse_messaging ? "valid" : "invalid"));
 
@@ -79,14 +98,14 @@ namespace SKU {
 
 	bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry* registry)
 	{
-		if (!registry)
+		if (registry == nullptr)
 		{
 			Plugin::Log(LOGL_VERBOSE, "(SKSE Register Functions Event) Plugin: SKSE passed a invalid argument. Ignoring.");
 
 			return false;
 		}
 
-		for (IEventHandler *event_handler : Plugin::GetInstance()->event_handler_set)
+		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
 			if (event_handler) event_handler->OnSKSERegisterPapyrusFunctions(registry);
 
 		return true;
@@ -96,7 +115,7 @@ namespace SKU {
 	{
 		if (message == nullptr)
 		{
-			Plugin::Log(LOGL_VERBOSE, "(SKSE Message Event) Plugin: SKSE passed a invalid argument. Ignoring.");
+			Log(LOGL_VERBOSE, "(SKSE Message Event) Plugin: SKSE passed a invalid argument. Ignoring.");
 
 			return;
 		}
@@ -106,28 +125,19 @@ namespace SKU {
 			case SKSEMessagingInterface::kMessage_PostLoadGame:
 			case SKSEMessagingInterface::kMessage_NewGame:
 			{
-				Plugin::Log(LOGL_VERBOSE, "Plugin: Game is ready");
-				Plugin::GetInstance()->is_game_ready = true;
+				Log(LOGL_VERBOSE, "Plugin: Game is ready");
+				GetInstance()->is_game_ready = true;
 			} break;
 
 			case SKSEMessagingInterface::kMessage_PreLoadGame:
 			{
-				Plugin::Log(LOGL_VERBOSE, "Plugin: Game is not ready");
-				Plugin::GetInstance()->is_game_ready = false;
+				Log(LOGL_VERBOSE, "Plugin: Game is not ready");
+				GetInstance()->is_game_ready = false;
 			} break;
 		}
 
-		for (IEventHandler *event_handler : Plugin::GetInstance()->event_handler_set)
+		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
 			if(event_handler) event_handler->OnSKSEMessage(message);
-	}
-
-	void Plugin::Stop() // TODO: Implement properly
-	{
-		event_handler_set.clear();
-
-		Net::Interface::GetInstance()->Stop();
-
-		is_plugin_active = false;		
 	}
 
 	bool Plugin::IsGameReady()
@@ -143,8 +153,8 @@ namespace SKU {
 		va_list args;
 		std::string cfmt;
 		
-		//if (level > DEBUG)
-		//	return;
+		if (level > DEBUG)
+			return;
 
 		va_start(args, fmt);
 
@@ -177,5 +187,29 @@ extern "C"
 	bool __declspec(dllexport) SKSEPlugin_Load(const SKSEInterface * skse)
 	{
 		return SKU::Plugin::GetInstance()->OnSKSELoad(skse);
+	}
+}
+
+extern "C"
+{
+	BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+	{
+		switch (fdwReason)
+		{
+			case DLL_PROCESS_ATTACH:
+			{
+				gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
+
+				if (SKU::Plugin::GetInstance()->Initialize() == false)
+					return FALSE;
+			} break;
+
+			case DLL_PROCESS_DETACH:
+			{
+				SKU::Plugin::GetInstance()->Stop();
+			} break;
+		}
+
+		return TRUE;
 	}
 }

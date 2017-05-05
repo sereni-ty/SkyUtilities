@@ -5,6 +5,9 @@
 
 #include <set>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 struct SKSEInterface;
 struct PluginInfo;
 
@@ -29,12 +32,17 @@ enum
 #define PLUGIN_NAME "SkyUtilities"
 
 #define PLUGIN_RELATIVE_LOG_PATH "\\My Games\\Skyrim\\SKSE\\" PLUGIN_NAME ".log"
+#define PLUGIN_LOG_FILENAME PLUGIN_NAME ".log"
 
 namespace SKU {
 
 	class Plugin : public Singleton<Plugin>/*, public IEventDistributor*/
 	{
 		IS_SINGLETON_CLASS(Plugin)
+
+		public:
+			bool Initialize();
+			void Stop();
 
 		public:
 			bool OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info);
@@ -44,19 +52,19 @@ namespace SKU {
 			static void OnSKSEMessageProxy(SKSEMessagingInterface::Message*);
 
 		public:
-			void Stop();
-
-		public:
 			bool IsGameReady();
 
 		public:
-			static inline void Log(unsigned int level, const char *fmt, ...);
+			static void Log(unsigned int level, const char *fmt, ...);
 
 		private:
 			std::set<IEventHandler*> event_handler_set;
 
 			bool is_plugin_active;
 			bool is_game_ready;
+
+		private:
+			std::set<HINSTANCE> dll_handle_set;
 	};
 
 }
