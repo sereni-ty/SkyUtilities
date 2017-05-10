@@ -1,5 +1,5 @@
 #include "Plugin.h"
-#include "PapyrusEvents.h"
+#include "PapyrusEventHandler.h"
 
 #include "Net/Interface.h"
 #include "Net/Request.h"
@@ -16,7 +16,9 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 	Interface::Interface() 
 		: stopped(false)
 	{
-		Plugin::Log(LOGL_INFO, "Net: Setting up SKSE mod events.");
+		Plugin::Log(LOGL_INFO, "Net: Initializing.");
+		Plugin::Log(LOGL_DETAILED, "Net: Enabling events");
+		PapyrusEventHandler::GetInstance()->Register(GetEventString(evRequestFinished));
 	}
 
 	Interface::~Interface() 
@@ -28,6 +30,8 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 	{
 		if (stopped == true)
 			return;
+
+		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evRequestFinished));
 
 		HTTP::RequestManager::GetInstance()->Stop();
 		stopped = true;
@@ -64,7 +68,8 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 			request->SetTimeout(timeout);
 			request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
-			SKU::PapyrusEvent::RegisterListener(GetEventString(evRequestFinished), form);
+			if(form != nullptr)
+				PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evRequestFinished), form);
 
 			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request, true))
 			{
@@ -73,7 +78,7 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 		}
 		catch (std::bad_exception)
 		{
-			Plugin::Log(LOGL_CRITICAL, "Stopping Plugin");
+			Plugin::Log(LOGL_CRITICAL, "Stopping Plugin.");
 			Plugin::GetInstance()->Stop();
 		}
 		catch (std::exception) {}
@@ -81,19 +86,51 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 		return Request::sFailed;
 	}
 
+	BSFixedString Interface::URLEncode(StaticFunctionTag*, BSFixedString raw)
+	{
+		std::string encoded;
+		size_t raw_len;
+		CURL *curl;
+
+		if (raw.data != nullptr 
+		&& (raw_len = strlen(raw.data)) > 0)
+		{
+			if((curl = curl_easy_init()) != nullptr)
+			{
+				char *output = curl_easy_escape(curl, raw.data, raw_len);
+
+				if (output != nullptr) 
+				{
+					encoded.assign(output);
+					curl_free(output);
+				}
+
+				curl_easy_cleanup(curl);
+			}
+			else // OOM
+			{
+				Plugin::Log(LOGL_CRITICAL, "Stopping Plugin.");
+				Plugin::GetInstance()->Stop();
+			}
+		}
+
+		return encoded.c_str();
+	}
+
 	void Interface::OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry)
 	{
-		registry->RegisterFunction(new NativeFunction3<StaticFunctionTag, long, TESForm*, BSFixedString,				long>("HTTPGETRequest", "SKUNet", HTTPGETRequest, registry));
-		registry->RegisterFunction(new NativeFunction4<StaticFunctionTag, long, TESForm*, BSFixedString, BSFixedString,	long>("HTTPPOSTRequest", "SKUNet", HTTPPOSTRequest, registry));
+		registry->RegisterFunction(new NativeFunction3<StaticFunctionTag, long, TESForm*, BSFixedString, long>					("HTTPGETRequest", "SKUNet", HTTPGETRequest, registry));
+		registry->RegisterFunction(new NativeFunction4<StaticFunctionTag, long, TESForm*, BSFixedString, BSFixedString, long>	("HTTPPOSTRequest", "SKUNet", HTTPPOSTRequest, registry));
+		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLEncode", "SKUNet", URLEncode, registry));
 
-		Plugin::Log(LOGL_VERBOSE, "Net: Registered Papyrus functions.");
+		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
 	}
 
 	std::string Interface::GetEventString(PapyrusEvent event)
 	{
 		switch (event)
 		{
-			case evRequestFinished: return "OnRequestFinished"; // return "SKUNet.RequestFinished";
+			case evRequestFinished: return "OnRequestFinished";
 			default: return "";
 		}
 	}

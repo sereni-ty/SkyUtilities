@@ -23,6 +23,8 @@ namespace SKU { namespace Net {
 
 			static long HTTPRequest(TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout);
 
+			static BSFixedString URLEncode(StaticFunctionTag*, BSFixedString raw);
+
 		public:
 			static BSFixedString GetBufferedData(StaticFunctionTag*, long request_id);
 

@@ -1,5 +1,7 @@
 #include "Plugin.h"
 
+#include "PapyrusEventHandler.h"
+
 #include "Net/Interface.h"
 
 #include <common/IDebugLog.h>

@@ -53,7 +53,8 @@ namespace SKU {
 
 		public:
 			bool IsGameReady();
-
+			//bool IsPluginActive();
+			
 		public:
 			static void Log(unsigned int level, const char *fmt, ...);
 
@@ -62,9 +63,6 @@ namespace SKU {
 
 			bool is_plugin_active;
 			bool is_game_ready;
-
-		private:
-			std::set<HINSTANCE> dll_handle_set;
 	};
 
 }

@@ -47,7 +47,10 @@
     <ClInclude Include="Net\Interface.h">
       <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="PapyrusEvents.h">
+    <ClInclude Include="PapyrusEvent.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="PapyrusEventHandler.h">
       <Filter>Internal</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,7 +74,10 @@
     <ClCompile Include="Net\Interface.cpp">
       <Filter>Net</Filter>
     </ClCompile>
-    <ClCompile Include="PapyrusEvents.cpp">
+    <ClCompile Include="PapyrusEvent.cpp">
+      <Filter>Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="PapyrusEventHandler.cpp">
       <Filter>Internal</Filter>
     </ClCompile>
   </ItemGroup>

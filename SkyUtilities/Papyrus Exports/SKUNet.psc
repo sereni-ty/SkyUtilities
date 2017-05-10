@@ -1,9 +1,24 @@
 scriptname SKUNet hidden
 
+; =========================================================
+; EVENTS
+; =========================================================
 ;
-; Performs a HTTP POST request
+; OnRequestFinished:
+; > event OnRequestFinished(int request_id, bool request_failed, int response_code, string response_body) 
+; > endEvent
 ;
-; @param	Form	..
+
+
+; =========================================================
+; FUNCTIONS (STATIC)
+; =========================================================
+;
+;
+; Performs a HTTP POST request. 
+; Registers for event if Form argument was passed: OnRequestFinished.
+;
+; @param	Form	Script instance on which the stated events will be registered and called.
 ; @param 	string	URL. See https://curl.haxx.se/libcurl/c/CURLOPT_URL.html for more details
 ; @param 	string	Data to post. Make sure you encode the values if they contain illegal characters. See https://curl.haxx.se/libcurl/c/curl_easy_escape.html for more details
 ; @param	int		Timeout in ms
@@ -13,8 +28,9 @@ int function HTTPPOSTRequest(Form form, string url, string data, int timeout) gl
 
 ;
 ; Performs a HTTP GET request.
+; Registers for event if Form argument was passed: OnRequestFinished.
 ;
-; @param	Form	..
+; @param	Form	Script instance on which the stated events will be registered and called.
 ; @param 	string	URL. See https://curl.haxx.se/libcurl/c/CURLOPT_URL.html for more details
 ; @param	float	Timeout in ms
 ; @return	int	Error code (CURL error is logged) or positive integer (Request ID)
@@ -22,21 +38,11 @@ int function HTTPPOSTRequest(Form form, string url, string data, int timeout) gl
 int function HTTPGETRequest(Form form, string url, int timeout) global native
 
 ;
+; The function name pretty much says it all. For more information see: https://curl.haxx.se/libcurl/c/curl_easy_escape.html
 ;
-; @param 	string	Unencoded string
+; @param 	string	raw string
 ; @return	string	URL encoded string
 ;
-; -- Not yet implemented
 ;
-;string function URLEncode(string data) global native
-
-;
-; Returns an error status text 
-;
-; -- Not yet implemented
-; 
-; @param	int	Request ID
-; @return	string 
-;
-;string function GetStatusString(int id) global native
+string function URLEncode(string data) global native
 

@@ -54,10 +54,6 @@ namespace SKU { namespace Net {	// TODO: Serialization. Save / Load undone reque
 			unsigned timeout;
 
 			std::mutex mtx;
-
-		friend class Interface;
-		friend class RequestPool;
-		friend class RequestManager;
 	};
 
 #	include "Request.inl"

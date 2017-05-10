@@ -27,7 +27,7 @@ namespace SKU { namespace Net { namespace HTTP {
 		this->body = body;
 		this->method = method;
 
-		Plugin::Log(LOGL_VERBOSE, "(RequestProtocolContext::Initialize): request (id: %d) URL=\"%s\"", GetOwner()->GetID(), url.c_str());
+		Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestProtocolContext: Request (id: %d) URL=\"%s\"", GetOwner()->GetID(), url.c_str());
 	}
 
 	void RequestProtocolContext::Cleanup()

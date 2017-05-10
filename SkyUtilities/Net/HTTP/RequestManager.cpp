@@ -4,7 +4,7 @@
 #include "Net/Interface.h"
 
 #include "Plugin.h"
-#include "PapyrusEvents.h"
+#include "PapyrusEventHandler.h"
 
 #include <mutex>
 
@@ -222,6 +222,7 @@ namespace SKU { namespace Net { namespace HTTP {
 
 			Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Setting up request (id: %d)", request->GetID());
 
+			curl_easy_setopt(ctx->curl_handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_URL, ctx->url.c_str());
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEFUNCTION, OnRequestResponse);
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEDATA, (void*) request->GetID());
@@ -351,28 +352,43 @@ namespace SKU { namespace Net { namespace HTTP {
 
 			request->Lock();
 
+			if (request->GetState() <= Request::sOK)	// Was cleaned up before but curl apparently had
+			{											// several messages in its queue for this request.
+				request->Unlock();
+				continue;
+			}
+
 			RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
 			request->SetState(info->data.result == CURLE_OK ? Request::sOK : Request::sFailed);
 			ctx->curl_last_error = info->data.result;
 
 			curl_last_error = curl_multi_remove_handle(curl_handle, ctx->curl_handle);
-			
-			request->Stop();
 
 			Plugin::Log(LOGL_DETAILED, "Request (id: %d, error code: %d) has %s", 
 				request->GetID(), 
 				info->data.result,
 				info->data.result == CURLE_OK ? "finished successfully" : "failed");
 
+			PapyrusEvent::Args &args = PapyrusEvent::Args { request->GetID(), request->GetState() == Request::sFailed };
+
 			if (info->data.result == CURLE_OK)
 			{
-				PapyrusEvent(Interface::GetEventString(Interface::evRequestFinished))
-					.SetArgument((long)request->GetID())
-					.SetArgument(ctx->response)
-					.Send();
+				long response_code;
+				curl_easy_getinfo(ctx->curl_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+				args.emplace_back(response_code);
+				args.emplace_back(ctx->response);
+			}
+			else
+			{
+				args.emplace_back(-1);
+				args.emplace_back(std::string(""));
 			}
 
+			PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evRequestFinished), std::move(args));
+
+			request->Stop();
 			request->Unlock();
 
 			if (curl_last_error != CURLM_OK)
