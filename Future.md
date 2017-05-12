@@ -1,6 +1,4 @@
-= Thoughts
-
-=== Misc
+# Thoughts
 
 + Papyrus load minimizer:
   (Check): Amount of (active) scripts
