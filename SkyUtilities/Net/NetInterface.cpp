@@ -1,7 +1,7 @@
 #include "Plugin.h"
 #include "PapyrusEventHandler.h"
 
-#include "Net/Interface.h"
+#include "Net/NetInterface.h"
 #include "Net/Request.h"
 #include "Net/HTTP/RequestProtocolContext.h"
 #include "Net/HTTP/RequestManager.h"
@@ -11,7 +11,7 @@
 
 #include <exception>
 
-namespace SKU { namespace Net { // TODO: Consider writing class with control management (Start, Stop, ..), e.g. InterfaceBase (Start, Stop, Initialize)
+namespace SKU::Net { // TODO: Consider writing class with control management (Start, Stop, ..), e.g. InterfaceBase (Start, Stop, Initialize)
 
 	Interface::Interface() 
 		: stopped(false)
@@ -31,9 +31,13 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 		if (stopped == true)
 			return;
 
+		// events
 		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evHTTPRequestFinished));
 
+		// request managers
 		HTTP::RequestManager::GetInstance()->Stop();
+		
+		// internal state
 		stopped = true;
 
 		Plugin::Log(LOGL_VERBOSE, "Net: Stopped.");
@@ -134,4 +138,4 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 			default: return "";
 		}
 	}
-}}
+}

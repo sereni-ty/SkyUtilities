@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 	
 	class Request;
 
@@ -35,4 +35,4 @@ namespace SKU { namespace Net {
 		friend class Request;
 	};
 
-}}
+}

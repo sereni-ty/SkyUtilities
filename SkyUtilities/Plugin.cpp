@@ -2,7 +2,8 @@
 
 #include "PapyrusEventHandler.h"
 
-#include "Net/Interface.h"
+#include "Net/NetInterface.h"
+#include "Storage/StorageInterface.h"
 
 #include <common/IDebugLog.h>
 #include <skse/PluginAPI.h>
@@ -37,7 +38,8 @@ namespace SKU {
 
 		//
 		// Event handler
-		event_handler_set.insert(Net::Interface::GetInstance());
+		event_handler_set.emplace(Net::Interface::GetInstance());
+		event_handler_set.emplace(Storage::Interface::GetInstance());
 
 		return true;
 	}

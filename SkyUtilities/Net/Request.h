@@ -7,7 +7,7 @@
 #include <memory>
 #include <mutex>
 
-namespace SKU { namespace Net {	// TODO: Serialization. Save / Load undone requests from savegame __BUT__ check first if that is even necessary if only the event gets the response and there is basically no interaction between papyrus and this interface besides starting a request and setting up an event callback function
+namespace SKU::Net {	// TODO: Serialization. Save / Load undone requests from savegame __BUT__ check first if that is even necessary if only the event gets the response and there is basically no interaction between papyrus and this interface besides starting a request and setting up an event callback function
 
 	class Request : public Lockable
 	{
@@ -58,4 +58,4 @@ namespace SKU { namespace Net {	// TODO: Serialization. Save / Load undone reque
 
 #	include "Request.inl"
 
-}}
+}

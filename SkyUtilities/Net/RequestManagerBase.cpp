@@ -2,7 +2,7 @@
 
 #include "Plugin.h"
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 	
 	bool RequestManagerBase::AddRequest(Request::Ptr request, bool proccess_immediately)
 	{
@@ -40,4 +40,4 @@ namespace SKU { namespace Net {
 
 		return nullptr;
 	}
-}}
+}

@@ -3,7 +3,7 @@
 #include "Singleton.h"
 #include "Net/RequestPool.h"
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 
 	class RequestManagerBase
 	{
@@ -20,4 +20,4 @@ namespace SKU { namespace Net {
 			RequestPool pool;
 	};
 
-}}
+}

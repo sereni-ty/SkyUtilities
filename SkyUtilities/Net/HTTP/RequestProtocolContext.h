@@ -5,7 +5,7 @@
 #include <curl/curl.h>
 #include <string>
 
-namespace SKU { namespace Net { namespace HTTP {
+namespace SKU::Net::HTTP {
 
 	class RequestProtocolContext : public IRequestProtocolContext
 	{
@@ -33,4 +33,4 @@ namespace SKU { namespace Net { namespace HTTP {
 		friend class RequestManager;
 	};
 
-}}}
+}

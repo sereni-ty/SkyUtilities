@@ -10,6 +10,7 @@
 		~ClassName();
 
 namespace SKU {
+
 	template< class T=std::is_class<T> >
 	class Singleton
 	{

@@ -8,8 +8,8 @@
 #include <vector>
 #include <any>
 
-namespace SKU
-{
+namespace SKU {
+
 	class PapyrusEventHandler;
 
 	class PapyrusEvent : public IFunctionArguments

@@ -1,14 +1,14 @@
 #include "Net/HTTP/RequestManager.h"
 #include "Net/HTTP/RequestProtocolContext.h"
 
-#include "Net/Interface.h"
+#include "Net/NetInterface.h"
 
 #include "Plugin.h"
 #include "PapyrusEventHandler.h"
 
 #include <mutex>
 
-namespace SKU { namespace Net { namespace HTTP {
+namespace SKU::Net::HTTP {
 
 	RequestManager::RequestManager() 
 		: should_run(false), curl_handle(nullptr)
@@ -414,4 +414,4 @@ namespace SKU { namespace Net { namespace HTTP {
 		return size*nmemb;
 	}
 
-}}}
+}

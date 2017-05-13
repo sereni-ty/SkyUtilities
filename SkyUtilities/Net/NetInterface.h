@@ -8,7 +8,7 @@
 struct StaticFunctionTag;
 class TESForm;
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 
 	class Interface : public Singleton<Interface>, public IEventHandler
 	{
@@ -26,9 +26,6 @@ namespace SKU { namespace Net {
 			static BSFixedString URLEncode(StaticFunctionTag*, BSFixedString raw);
 
 		public:
-			static BSFixedString GetBufferedData(StaticFunctionTag*, long request_id);
-
-		public:
 			void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry);
 
 		public:
@@ -43,4 +40,4 @@ namespace SKU { namespace Net {
 			bool stopped;
 	};
 
-}}
+}

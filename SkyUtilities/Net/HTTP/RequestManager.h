@@ -7,7 +7,7 @@
 #include <future>
 #include <curl/curl.h>
 
-namespace SKU { namespace Net { namespace HTTP {
+namespace SKU::Net::HTTP {
 
 	class RequestManager : public Singleton<RequestManager>, public SKU::Net::RequestManagerBase
 	{
@@ -39,4 +39,4 @@ namespace SKU { namespace Net { namespace HTTP {
 			CURLMcode curl_last_error;
 	};
 
-}}}
+}

@@ -3,7 +3,7 @@
 
 #include <exception>
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 
 	static unsigned GLOBAL_REQUEST_ID_COUNTER = 0;
 
@@ -55,4 +55,4 @@ namespace SKU { namespace Net {
 		timeout = ms;
 	}
 
-}}
+}

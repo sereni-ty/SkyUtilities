@@ -23,7 +23,7 @@
     <ClInclude Include="Lockable.h" />
     <ClInclude Include="Net\HTTP\RequestManager.h" />
     <ClInclude Include="Net\HTTP\RequestProtocolContext.h" />
-    <ClInclude Include="Net\Interface.h" />
+    <ClInclude Include="Net\NetInterface.h" />
     <ClInclude Include="Net\Request.h" />
     <ClInclude Include="Net\RequestManagerBase.h" />
     <ClInclude Include="Net\RequestPool.h" />
@@ -32,17 +32,19 @@
     <ClInclude Include="PapyrusEventHandler.h" />
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Storage\StorageInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PapyrusEvent.cpp" />
     <ClCompile Include="Net\HTTP\RequestManager.cpp" />
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp" />
-    <ClCompile Include="Net\Interface.cpp" />
+    <ClCompile Include="Net\NetInterface.cpp" />
     <ClCompile Include="Net\Request.cpp" />
     <ClCompile Include="Net\RequestManagerBase.cpp" />
     <ClCompile Include="Net\RequestPool.cpp" />
     <ClCompile Include="PapyrusEventHandler.cpp" />
     <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="Storage\StorageInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Libraries\SKSE\common\common.vcxproj">

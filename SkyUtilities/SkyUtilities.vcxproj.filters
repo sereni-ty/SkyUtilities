@@ -14,6 +14,9 @@
     <Filter Include="Net\HTTP">
       <UniqueIdentifier>{6cb04ecb-445f-4ded-b599-2bdf7d6c794b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Storage">
+      <UniqueIdentifier>{a4656b49-344c-48ab-87e4-d7e25a6be9bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Singleton.h">
@@ -44,14 +47,17 @@
     <ClInclude Include="Net\HTTP\RequestProtocolContext.h">
       <Filter>Net\HTTP</Filter>
     </ClInclude>
-    <ClInclude Include="Net\Interface.h">
-      <Filter>Net</Filter>
-    </ClInclude>
     <ClInclude Include="PapyrusEvent.h">
       <Filter>Internal</Filter>
     </ClInclude>
     <ClInclude Include="PapyrusEventHandler.h">
       <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\NetInterface.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Storage\StorageInterface.h">
+      <Filter>Storage</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,14 +77,17 @@
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp">
       <Filter>Net\HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="Net\Interface.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
     <ClCompile Include="PapyrusEvent.cpp">
       <Filter>Internal</Filter>
     </ClCompile>
     <ClCompile Include="PapyrusEventHandler.cpp">
       <Filter>Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\NetInterface.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage\StorageInterface.cpp">
+      <Filter>Storage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

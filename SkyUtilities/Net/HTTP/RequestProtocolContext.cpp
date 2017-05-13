@@ -4,7 +4,7 @@
 
 #include <exception>
 
-namespace SKU { namespace Net { namespace HTTP {
+namespace SKU::Net::HTTP {
 	
 	void RequestProtocolContext::Initialize(Method method, std::string url, std::string body)
 	{
@@ -39,4 +39,4 @@ namespace SKU { namespace Net { namespace HTTP {
 		}
 	}
 
-}}}
+}

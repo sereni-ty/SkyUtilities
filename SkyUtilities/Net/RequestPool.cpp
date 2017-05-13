@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 
 	Request::Ptr RequestPool::GetRequestByID(int id)
 	{
@@ -53,4 +53,4 @@ namespace SKU { namespace Net {
 		return pool;
 	}
 
-}}
+}

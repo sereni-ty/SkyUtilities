@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <list>
 
-namespace SKU { namespace Net {
+namespace SKU::Net {
 	
 	class RequestPool 
 	{
@@ -29,4 +29,4 @@ namespace SKU { namespace Net {
 			std::set<Request::Ptr> pool;
 	};
 
-}}
+}
