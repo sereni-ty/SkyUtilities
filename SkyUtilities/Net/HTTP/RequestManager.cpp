@@ -378,7 +378,7 @@ namespace SKU { namespace Net { namespace HTTP {
 				curl_easy_getinfo(ctx->curl_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
 				args.emplace_back(std::make_any<int>(response_code));
-				args.emplace_back(std::make_any<std::string>(ctx->response)); // buffer too small
+				args.emplace_back(std::make_any<std::string>(ctx->response));
 			}
 			else
 			{
