@@ -386,7 +386,7 @@ namespace SKU { namespace Net { namespace HTTP {
 				args.emplace_back(std::make_any<std::string>());
 			}
 
-			PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evRequestFinished), std::move(args));
+			PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evHTTPRequestFinished), std::move(args));
 
 			request->Stop();
 			request->Unlock();

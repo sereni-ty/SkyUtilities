@@ -34,7 +34,7 @@ namespace SKU { namespace Net {
 		public:
 			enum PapyrusEvent
 			{
-				evRequestFinished
+				evHTTPRequestFinished
 			};
 
 			static std::string GetEventString(PapyrusEvent event);

@@ -18,7 +18,7 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 	{
 		Plugin::Log(LOGL_INFO, "Net: Initializing.");
 		Plugin::Log(LOGL_DETAILED, "Net: Enabling events");
-		PapyrusEventHandler::GetInstance()->Register(GetEventString(evRequestFinished));
+		PapyrusEventHandler::GetInstance()->Register(GetEventString(evHTTPRequestFinished));
 	}
 
 	Interface::~Interface() 
@@ -31,7 +31,7 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 		if (stopped == true)
 			return;
 
-		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evRequestFinished));
+		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evHTTPRequestFinished));
 
 		HTTP::RequestManager::GetInstance()->Stop();
 		stopped = true;
@@ -69,7 +69,7 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 			request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
 			if(form != nullptr)
-				PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evRequestFinished), form);
+				PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
 
 			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request, true))
 			{
@@ -130,7 +130,7 @@ namespace SKU { namespace Net { // TODO: Consider writing class with control man
 	{
 		switch (event)
 		{
-			case evRequestFinished: return "OnRequestFinished";
+			case evHTTPRequestFinished: return "OnHTTPRequestFinished";
 			default: return "";
 		}
 	}

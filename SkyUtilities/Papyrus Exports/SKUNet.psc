@@ -4,8 +4,8 @@ scriptname SKUNet hidden
 ; EVENTS
 ; =========================================================
 ;
-; OnRequestFinished:
-; > event OnRequestFinished(int request_id, bool request_failed, int response_code, string response_body) 
+; OnHTTPRequestFinished:
+; > event OnHTTPRequestFinished(int request_id, bool request_failed, int response_code, string response_body) 
 ; > endEvent
 ;
 
