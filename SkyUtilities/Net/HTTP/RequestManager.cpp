@@ -370,20 +370,20 @@ namespace SKU { namespace Net { namespace HTTP {
 				info->data.result,
 				info->data.result == CURLE_OK ? "finished successfully" : "failed");
 
-			PapyrusEvent::Args &args = PapyrusEvent::Args { request->GetID(), request->GetState() == Request::sFailed };
+			PapyrusEvent::Args &args = PapyrusEvent::Args { std::make_any<int>(request->GetID()), std::make_any<bool>(request->GetState() == Request::sFailed) };
 
 			if (info->data.result == CURLE_OK)
 			{
 				long response_code;
 				curl_easy_getinfo(ctx->curl_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-				args.emplace_back(response_code);
-				args.emplace_back(ctx->response);
+				args.emplace_back(std::make_any<int>(response_code));
+				args.emplace_back(std::make_any<std::string>(ctx->response)); // buffer too small
 			}
 			else
 			{
-				args.emplace_back(-1);
-				args.emplace_back(std::string(""));
+				args.emplace_back(std::make_any<int>(-1));
+				args.emplace_back(std::make_any<std::string>());
 			}
 
 			PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evRequestFinished), std::move(args));

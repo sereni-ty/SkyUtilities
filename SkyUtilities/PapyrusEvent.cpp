@@ -27,14 +27,39 @@ namespace SKU {
 
 		for (unsigned i = 0; i < arguments.size(); i++)
 		{
-			// TODO: check what about std::any_cast does not work like it should. Call works fine.
+			// TODO: Missing types. Common ones are handled.
 			size_t arg_type = arguments.at(i).type().hash_code();
-
-			if (arg_type == typeid(bool).hash_code()) dst->Get(i)->SetBool(std::any_cast<bool>(arguments.at(i)));
-			else if (arg_type == typeid(int).hash_code()) dst->Get(i)->SetInt(std::any_cast<long>(arguments.at(i)));
-			else if (arg_type == typeid(float).hash_code()) dst->Get(i)->SetFloat(std::any_cast<float>(arguments.at(i)));
-			else if (arg_type == typeid(std::string).hash_code()) dst->Get(i)->SetString(std::any_cast<std::string>(arguments.at(i)).c_str());
-			else if (arg_type == typeid(char*).hash_code()) dst->Get(i)->SetString(std::any_cast<char*>(arguments.at(i)));
+			
+			if (arg_type == typeid(bool).hash_code()) 
+			{ 
+				auto value = std::any_cast<bool>(arguments.at(i));
+				Plugin::Log(LOGL_DETAILED, "PapyrusEvent: Argument #%d is '%s' (bool).", i+1, value == true ? "true" : "false");
+				dst->Get(i)->SetBool(value); 
+			}
+			else if (arg_type == typeid(int).hash_code()) 
+			{
+				auto value = std::any_cast<int>(arguments.at(i));
+				Plugin::Log(LOGL_DETAILED, "PapyrusEvent: Argument #%d is '%d' (int).", i + 1, value);
+				dst->Get(i)->SetInt(value);
+			}
+			else if (arg_type == typeid(float).hash_code())
+			{
+				auto value = std::any_cast<float>(arguments.at(i));
+				Plugin::Log(LOGL_DETAILED, "PapyrusEvent: Argument #%d is '%f' (float).", i + 1, value);
+				dst->Get(i)->SetFloat(value);
+			}
+			else if (arg_type == typeid(std::string).hash_code())
+			{
+				auto value = std::any_cast<std::string>(arguments.at(i));
+				Plugin::Log(LOGL_DETAILED, "PapyrusEvent: Argument #%d is a string (std::string).", i + 1);
+				dst->Get(i)->SetString(value.c_str());
+			}
+			else if (arg_type == typeid(char*).hash_code())
+			{
+				auto value = std::any_cast<char *>(arguments.at(i));
+				Plugin::Log(LOGL_DETAILED, "PapyrusEvent: Argument #%d is a string (char*).", i + 1);
+				dst->Get(i)->SetString(value);
+			}
 		}
 
 		return true;
