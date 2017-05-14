@@ -23,13 +23,13 @@ Thinking about:
 
 ### Requirements
 
-## Libraries
+#### Libraries
 
 + [SKSE][site_skse] (≥ *v1.9.32.0*)
 + [libCURL][site_curl] (≥ *7.54.0*)
 + [boost][site_boost] (≥ *1.63.0*)
 
-## Compiler
+#### Compiler
 
 A compiler with partial C++17 feature implementation (std::any, nested namespaces, *try_emplace*, ..)
 
