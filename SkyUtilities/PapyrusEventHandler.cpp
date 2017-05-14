@@ -38,12 +38,19 @@ namespace SKU {
 
 	void PapyrusEventHandler::Register(const std::string &event_name)
 	{
-		event_key_map.try_emplace(event_name, BSFixedString(event_name.c_str()));
+		try
+		{
+			event_key_map.try_emplace(event_name, BSFixedString(event_name.c_str()));
 		
-		recipient_map.try_emplace(event_name, std::unordered_set<PapyrusEventRecipient>());
-		event_map.try_emplace(event_name, std::unordered_set< std::unique_ptr<PapyrusEvent> >());
+			recipient_map.try_emplace(event_name, std::unordered_set<PapyrusEventRecipient>());
+			event_map.try_emplace(event_name, std::unordered_set< std::unique_ptr<PapyrusEvent> >());
 
-		Plugin::Log(LOGL_VERBOSE, "PapyrusEventHandler: Registered event '%s'.", event_name.c_str());
+			Plugin::Log(LOGL_VERBOSE, "PapyrusEventHandler: Registered event '%s'.", event_name.c_str());
+		}
+		catch (std::exception) 
+		{
+			Plugin::Log(LOGL_VERBOSE, "PapyrusEventHandler: Exception: Event '%s' not registered.", event_name.c_str());
+		}
 	}
 
 	void PapyrusEventHandler::Unregister(const std::string &event_name)

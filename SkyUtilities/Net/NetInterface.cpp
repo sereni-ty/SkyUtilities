@@ -121,7 +121,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		return encoded.c_str();
 	}
 
-	void Interface::OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry)
+	void Interface::OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept
 	{
 		registry->RegisterFunction(new NativeFunction3<StaticFunctionTag, long, TESForm*, BSFixedString, long>					("HTTPGETRequest", "SKUNet", HTTPGETRequest, registry));
 		registry->RegisterFunction(new NativeFunction4<StaticFunctionTag, long, TESForm*, BSFixedString, BSFixedString, long>	("HTTPPOSTRequest", "SKUNet", HTTPPOSTRequest, registry));
@@ -130,7 +130,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
 	}
 
-	std::string Interface::GetEventString(PapyrusEvent event)
+	std::string Interface::GetEventString(PapyrusEvent event) noexcept
 	{
 		switch (event)
 		{

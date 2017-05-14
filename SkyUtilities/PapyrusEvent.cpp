@@ -8,7 +8,7 @@
 
 namespace SKU {
 
-	PapyrusEvent::PapyrusEvent(Args &&args)
+	PapyrusEvent::PapyrusEvent(Args &&args) noexcept
 	{
 		arguments = std::move(args);
 	}

@@ -31,10 +31,12 @@ enum
 
 #define PLUGIN_NAME "SkyUtilities"
 
+#define PLUGIN_RELATIVE_SAVES_PATH "\\My Games\\Skyrim\\Saves\\"
 #define PLUGIN_RELATIVE_LOG_PATH "\\My Games\\Skyrim\\SKSE\\" PLUGIN_NAME ".log"
-#define PLUGIN_LOG_FILENAME PLUGIN_NAME ".log"
 
 namespace SKU {
+
+	//unsigned g_SerializationCounter = 1; // TODO: Placeholder.. think about a unique ID
 
 	class Plugin : public Singleton<Plugin>/*, public IEventDistributor*/
 	{

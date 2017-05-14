@@ -21,7 +21,7 @@ namespace SKU {
 			using Args = std::vector< std::any >;
 
 		public:
-			PapyrusEvent(Args &&args);
+			PapyrusEvent(Args &&args) noexcept;
 			~PapyrusEvent();
 			
 		// SKSE internal 

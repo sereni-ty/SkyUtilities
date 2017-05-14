@@ -17,10 +17,10 @@ namespace SKU {
 		friend T;
 
 		protected:
-			Singleton() {}
+			Singleton() noexcept {}
 			~Singleton() {}
 
 		public:
-			static T *GetInstance() { static T instance; return &instance; }
+			static T *GetInstance() noexcept { static T instance; return &instance; }
 	};
 }

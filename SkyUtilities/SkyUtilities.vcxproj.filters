@@ -59,6 +59,9 @@
     <ClInclude Include="Storage\StorageInterface.h">
       <Filter>Storage</Filter>
     </ClInclude>
+    <ClInclude Include="Storage\SaveGame.h">
+      <Filter>Storage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />
@@ -87,6 +90,9 @@
       <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="Storage\StorageInterface.cpp">
+      <Filter>Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage\SaveGame.cpp">
       <Filter>Storage</Filter>
     </ClCompile>
   </ItemGroup>

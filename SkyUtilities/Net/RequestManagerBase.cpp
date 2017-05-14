@@ -4,7 +4,7 @@
 
 namespace SKU::Net {
 	
-	bool RequestManagerBase::AddRequest(Request::Ptr request, bool proccess_immediately)
+	bool RequestManagerBase::AddRequest(Request::Ptr request, bool proccess_immediately) noexcept
 	{
 		try
 		{
@@ -30,7 +30,7 @@ namespace SKU::Net {
 		catch (std::exception){}
 	}
 
-	Request::Ptr RequestManagerBase::GetRequestByID(unsigned request_id)
+	Request::Ptr RequestManagerBase::GetRequestByID(unsigned request_id) noexcept
 	{
 		try
 		{

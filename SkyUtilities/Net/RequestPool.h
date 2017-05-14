@@ -5,7 +5,7 @@
 #include <set>
 #include <initializer_list>
 #include <algorithm>
-#include <list>
+#include <vector>
 
 namespace SKU::Net {
 	
@@ -15,7 +15,7 @@ namespace SKU::Net {
 			Request::Ptr GetRequestByID(int id);
 
 		public:
-			std::list<Request::Ptr> GetRequestsByState(Request::State state);
+			std::vector<Request::Ptr> GetRequestsByState(Request::State state);
 
 
 		public:
@@ -23,7 +23,7 @@ namespace SKU::Net {
 			int GetCountByStateExceptions(std::initializer_list<Request::State> state_list);
 
 		public:
-			std::set<Request::Ptr> &Get();
+			std::set<Request::Ptr> &Get() noexcept;
 				
 		private:
 			std::set<Request::Ptr> pool;

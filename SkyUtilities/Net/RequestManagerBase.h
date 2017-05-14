@@ -8,9 +8,9 @@ namespace SKU::Net {
 	class RequestManagerBase
 	{
 		public:
-			bool AddRequest(Request::Ptr request, bool proccess_immediately = false);
+			bool AddRequest(Request::Ptr request, bool proccess_immediately = false) noexcept;
 			virtual void RemoveRequest(Request::Ptr request);
-			Request::Ptr GetRequestByID(unsigned request_id);
+			Request::Ptr GetRequestByID(unsigned request_id) noexcept;
 
 		public:
 			virtual void Stop() = 0;

@@ -21,9 +21,9 @@ namespace SKU::Net {
 		return *request_pos;
 	}
 
-	std::list<Request::Ptr> RequestPool::GetRequestsByState(Request::State state)
+	std::vector<Request::Ptr> RequestPool::GetRequestsByState(Request::State state)
 	{
-		std::list<Request::Ptr> requests;
+		std::vector<Request::Ptr> requests;
 
 		for (Request::Ptr request : pool)
 			if (request->GetState() == state)
@@ -48,7 +48,7 @@ namespace SKU::Net {
 		});
 	}
 
-	std::set<Request::Ptr> &RequestPool::Get()
+	std::set<Request::Ptr> &RequestPool::Get() noexcept
 	{
 		return pool;
 	}

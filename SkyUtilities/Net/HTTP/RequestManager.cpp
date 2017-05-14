@@ -311,7 +311,7 @@ namespace SKU::Net::HTTP {
 		int message_count;
 		CURLMsg *info;
 
-		auto fnGetRequestByHandle = [&](CURL* curl_handle, std::list<Request::Ptr> &requests) -> Request::Ptr {
+		auto fnGetRequestByHandle = [&](CURL* curl_handle, std::vector<Request::Ptr> &requests) -> Request::Ptr {
 			Request::Ptr found_request;
 
 			for (Request::Ptr request : requests)

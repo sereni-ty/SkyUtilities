@@ -100,7 +100,7 @@ namespace SKU {
 				skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
 	}
 
-	bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry* registry)
+	bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry *registry)
 	{
 		if (registry == nullptr)
 		{
@@ -115,7 +115,7 @@ namespace SKU {
 		return true;
 	}
 
-	void Plugin::OnSKSEMessageProxy(SKSEMessagingInterface::Message* message)
+	void Plugin::OnSKSEMessageProxy(SKSEMessagingInterface::Message *message)
 	{
 		if (message == nullptr)
 		{

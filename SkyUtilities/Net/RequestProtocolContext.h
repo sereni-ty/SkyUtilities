@@ -16,15 +16,15 @@ namespace SKU::Net {
 			virtual ~IRequestProtocolContext() { Cleanup(); if(owner) owner.reset(); }
 
 		protected:
-			void SetOwner(std::shared_ptr<Request> owner) { this->owner = owner; }
-			std::shared_ptr<Request> GetOwner() const { return this->owner; }
+			void SetOwner(std::shared_ptr<Request> owner) noexcept { this->owner = owner; }
+			std::shared_ptr<Request> GetOwner() const noexcept { return this->owner; }
 
 		public:
 			virtual void Initialize() {};
 			virtual void Cleanup() {};
 
 		public:
-			virtual std::string GetResponse() { return response; }
+			virtual std::string GetResponse() noexcept { return response; }
 
 		protected:
 			std::string response;

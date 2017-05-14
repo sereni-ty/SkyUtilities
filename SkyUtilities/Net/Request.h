@@ -25,7 +25,7 @@ namespace SKU::Net {	// TODO: Serialization. Save / Load undone requests from sa
 			};
 
 		public:
-			Request();
+			Request() noexcept;
 			~Request();
 
 		public:
@@ -36,16 +36,16 @@ namespace SKU::Net {	// TODO: Serialization. Save / Load undone requests from sa
 			void Stop();
 
 		public:
-			int GetID();
-			State GetState();
-			unsigned GetTimeout(); // Timeout in ms
+			int GetID() noexcept;
+			State GetState() noexcept;
+			unsigned GetTimeout() noexcept; // Timeout in ms
 
 			template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
 			typename ProtocolContextType::Ptr GetProtocolContext();
 
 		public:
-			void SetState(State state);
-			void SetTimeout(unsigned ms);
+			void SetState(State state) noexcept;
+			void SetTimeout(unsigned ms) noexcept;
 
 		private:
 			int id;

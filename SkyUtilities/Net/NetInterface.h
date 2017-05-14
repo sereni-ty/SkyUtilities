@@ -26,7 +26,7 @@ namespace SKU::Net {
 			static BSFixedString URLEncode(StaticFunctionTag*, BSFixedString raw);
 
 		public:
-			void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry);
+			void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept;
 
 		public:
 			enum PapyrusEvent
@@ -34,7 +34,7 @@ namespace SKU::Net {
 				evHTTPRequestFinished
 			};
 
-			static std::string GetEventString(PapyrusEvent event);
+			static std::string GetEventString(PapyrusEvent event) noexcept;
 
 		private:
 			bool stopped;
