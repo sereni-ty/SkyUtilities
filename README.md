@@ -25,6 +25,8 @@ Thinking about:
 
 + [SKSE][site_skse] (≥ *v1.9.32.0*)
 + [libCURL][site_curl] (≥ *7.54.0*)
++ [boost][site_boost] (≥ *1.63.0*)
 
 [site_skse]: http://skse.silverlock.org
 [site_curl]: https://curl.haxx.se/
+[site_boost]: http://www.boost.org
