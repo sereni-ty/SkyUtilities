@@ -51,21 +51,19 @@ string function URLEncode(string data) global native
 ; ======================
 
 ;
-; This function will check for a newer version of the mod identified by the corresponding id than the version supplied as argument
+; Returns latest mod version 
 ;
 ; @param	string	Nexus mod ID ("www.nexusmods.com/skyrim/mods/<mod_id>". Example: "www.nexusmods.com/skyrim/mods/123456/", 123456 would be the id of the mod.)
-; @param	string	Installed version of the mod (for comparison)
-; @return	bool	Returns true if an update has been found
+; @return	string	Latest, released mod version
 ;
-;bool NexusUpdateAvailable(string nexus_mod_id, string installed_version_str) global native
+;string GetNexusModVersion(string nexus_mod_id) global native
 
 ;
-; This function will check for a newer version of the mod identified by the corresponding id than the version supplied as argument
+; Returns latest mod version 
 ;
 ; @param	string	Nexus mod ID ("www.loverslab.com/files/file/<mod_id>-some-mods-name/". Example: ""www.loverslab.com/files/file/123456-some-mods-name/", 123456 would be the id of the mod.)
-; @param	string	Installed version of the mod (for comparison)
-; @return	bool	Returns true if an update has been found
+; @return	string	Latest, released mod version
 ;
-;bool LoversLabUpdateAvailable(string ll_mod_id, string installed_version_str) global native
+;string GetLLabModVersion(string ll_mod_id) global native
 
 
