@@ -3,7 +3,7 @@
 #include "PapyrusEventHandler.h"
 
 #include "Net/NetInterface.h"
-#include "Storage/StorageInterface.h"
+#include "Net/HTTP/RequestManager.h"
 
 #include <common/IDebugLog.h>
 #include <skse/PluginAPI.h>
@@ -39,8 +39,7 @@ namespace SKU {
 		//
 		// Event handler
 		event_handler_set.emplace(Net::Interface::GetInstance());
-		event_handler_set.emplace(Storage::Interface::GetInstance());
-
+				
 		return true;
 	}
 
@@ -83,16 +82,22 @@ namespace SKU {
 
 		SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
 		SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
+		SKSESerializationInterface *skse_serialization = reinterpret_cast<SKSESerializationInterface*>(skse->QueryInterface(kInterface_Serialization));
 
-		if (skse_papyrus == nullptr || skse_messaging == nullptr)
+		if (skse_papyrus == nullptr || skse_messaging == nullptr || skse_serialization == nullptr)
 		{
 			Log(LOGL_INFO, "SKSE failed to return valid interfaces. Stopping plugin.");
-			Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s", 
+			Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s\n-\tSerialization: %s", 
 				(skse_papyrus ? "valid" : "invalid"),
-				(skse_messaging ? "valid" : "invalid"));
+				(skse_messaging ? "valid" : "invalid"),
+				(skse_serialization ? "valid" : "invalid"));
 
 			return false;
 		}
+
+		skse_serialization->SetUniqueID(skse->GetPluginHandle(), PLUGIN_SERIALIZATION_UID);
+		skse_serialization->SetSaveCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
+		skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
 
 		return 
 				skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
@@ -137,11 +142,44 @@ namespace SKU {
 			{
 				Log(LOGL_VERBOSE, "Plugin: Game is not ready");
 				GetInstance()->is_game_ready = false;
+				
 			} break;
 		}
 
 		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
 			if(event_handler) event_handler->OnSKSEMessage(message);
+	}
+
+	void Plugin::OnSKSESaveGameProxy(SKSESerializationInterface *serialization_interface)
+	{
+		Log(LOGL_VERBOSE, "Plugin: Serialization.");
+
+		if (serialization_interface == nullptr)
+		{
+			Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to save game.");
+			return;
+		}
+
+		PapyrusEventHandler::GetInstance()->Save(serialization_interface);
+
+		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+			if (event_handler) event_handler->OnSKSESaveGame(serialization_interface);
+	}
+
+	void Plugin::OnSKSELoadGameProxy(SKSESerializationInterface *serialization_interface)
+	{
+		Log(LOGL_VERBOSE, "Plugin: Deserialization.");
+
+		if (serialization_interface == nullptr)
+		{
+			Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to load game.");
+			return;
+		}
+
+		PapyrusEventHandler::GetInstance()->Load(serialization_interface);
+
+		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+			if (event_handler) event_handler->OnSKSELoadGame(serialization_interface);
 	}
 
 	bool Plugin::IsGameReady()

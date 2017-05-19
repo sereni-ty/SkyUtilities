@@ -20,6 +20,7 @@ namespace SKU::Net::HTTP {
 			};
 
 		public:
+			void Initialize();
 			void Initialize(Method method, std::string url, std::string body);
 			void Cleanup();
 

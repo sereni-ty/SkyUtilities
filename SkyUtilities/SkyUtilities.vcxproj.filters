@@ -14,8 +14,8 @@
     <Filter Include="Net\HTTP">
       <UniqueIdentifier>{6cb04ecb-445f-4ded-b599-2bdf7d6c794b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Storage">
-      <UniqueIdentifier>{a4656b49-344c-48ab-87e4-d7e25a6be9bb}</UniqueIdentifier>
+    <Filter Include="Events">
+      <UniqueIdentifier>{5c432e7c-fcf0-47f9-a8ce-4130aa3c8b05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -47,20 +47,17 @@
     <ClInclude Include="Net\HTTP\RequestProtocolContext.h">
       <Filter>Net\HTTP</Filter>
     </ClInclude>
-    <ClInclude Include="PapyrusEvent.h">
-      <Filter>Internal</Filter>
-    </ClInclude>
-    <ClInclude Include="PapyrusEventHandler.h">
-      <Filter>Internal</Filter>
-    </ClInclude>
     <ClInclude Include="Net\NetInterface.h">
       <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="Storage\StorageInterface.h">
-      <Filter>Storage</Filter>
+    <ClInclude Include="PapyrusEvent.h">
+      <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="Storage\SaveGame.h">
-      <Filter>Storage</Filter>
+    <ClInclude Include="PapyrusEventHandler.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.h">
+      <Filter>Internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -80,20 +77,14 @@
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp">
       <Filter>Net\HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="PapyrusEvent.cpp">
-      <Filter>Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="PapyrusEventHandler.cpp">
-      <Filter>Internal</Filter>
-    </ClCompile>
     <ClCompile Include="Net\NetInterface.cpp">
       <Filter>Net</Filter>
     </ClCompile>
-    <ClCompile Include="Storage\StorageInterface.cpp">
-      <Filter>Storage</Filter>
+    <ClCompile Include="PapyrusEvent.cpp">
+      <Filter>Events</Filter>
     </ClCompile>
-    <ClCompile Include="Storage\SaveGame.cpp">
-      <Filter>Storage</Filter>
+    <ClCompile Include="PapyrusEventHandler.cpp">
+      <Filter>Events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

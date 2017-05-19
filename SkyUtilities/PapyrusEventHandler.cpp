@@ -92,7 +92,7 @@ namespace SKU {
 	}
 
 	bool PapyrusEventHandler::AddRecipient(const std::string &event_name, TESForm *recipient)
-	{
+	{// TODO: Serialize policy handle?
 		VMClassRegistry *registry = (*g_skyrimVM)->GetClassRegistry();
 		IObjectHandlePolicy *policy = registry->GetHandlePolicy();
 		
@@ -131,4 +131,107 @@ namespace SKU {
 		recipient_map.clear();
 	}
 
+	void PapyrusEventHandler::Save(SKSESerializationInterface *serilization_interface)
+	{
+		Plugin::Log(LOGL_VERBOSE, "PapyrusEventHandler: Saving events and recipients.");
+
+		bool write_fail = false;
+
+		if (serilization_interface->OpenRecord(PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_TYPE, PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_VERSION) == false
+		|| serilization_interface->WriteRecordData((char *)recipient_map.size(), sizeof(size_t)))
+		{
+			Plugin::Log(LOGL_WARNING, "PapyrusEventHandler: Unable to save data.");
+			return;
+		}
+
+		for (auto &recipient_map_entry : recipient_map)
+		{
+			write_fail = true;
+			uint32_t tmp;
+
+			FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = recipient_map_entry.first.length()), 4);
+			FAIL_BREAK_WRITE(serilization_interface, recipient_map_entry.first.c_str(), recipient_map_entry.first.length());
+			FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = recipient_map_entry.second.size()), 4);
+
+			write_fail = false;
+
+			for (PapyrusEventRecipient recipient : recipient_map_entry.second)
+			{
+				write_fail = true;
+				FAIL_BREAK_WRITE(serilization_interface, (char *)recipient, 8);
+			}
+
+			if (write_fail == true)
+				break;
+		}
+
+		if (write_fail == true)
+		{
+			Plugin::Log(LOGL_WARNING, "PapyrusEventHandler: Failed to write save data.");
+		}
+	}
+
+	void PapyrusEventHandler::Load(SKSESerializationInterface *serilization_interface)
+	{
+		Plugin::Log(LOGL_VERBOSE, "PapyrusEventHandler: Loading event recipients.");
+
+		int events = 0;
+		bool read_fail = false;
+
+		if (serilization_interface->OpenRecord(PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_TYPE, PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_VERSION) == false
+		|| serilization_interface->ReadRecordData(&events, sizeof(int) != sizeof(int))) // amount of events
+		{
+			Plugin::Log(LOGL_WARNING, "PapyrusEventHandler: Unable to load data from save.");
+			return;
+		}
+
+
+		for (int i = 0; i < events; i++)
+		{
+			std::vector<char> buf;
+			size_t tmp;
+
+			read_fail = true;
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // event name size
+			
+			try
+			{
+				buf.resize(tmp + 1);
+			} 
+			catch (std::exception)
+			{
+				break;
+			}
+
+			FAIL_BREAK_READ(serilization_interface, &buf[0], tmp); // event name
+			Register(&buf[0]);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // amount of recipients
+
+			read_fail = false;
+
+			for (int j = 0; j < tmp; j++)
+			{
+				PapyrusEventRecipient recipient, new_handle;
+				FAIL_BREAK_READ(serilization_interface, &recipient, 8);
+
+				if (serilization_interface->ResolveHandle(recipient, &new_handle) == false)
+				{
+					Plugin::Log(LOGL_WARNING, "PapyrusEventHandler: Failed to resolve new recipient handle.");
+					break;
+				}
+
+				recipient_map.at(&buf[0]).emplace(new_handle);
+			}
+
+			if (read_fail == true)
+				break;
+		}
+
+		if (read_fail == true)
+		{
+			Plugin::Log(LOGL_WARNING, "PapyrusEventHandler: Failed to read save data.");
+		}
+	}
 }

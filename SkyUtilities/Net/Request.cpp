@@ -45,6 +45,14 @@ namespace SKU::Net {
 		return timeout;
 	}	
 
+	void Request::SetID(int id) noexcept
+	{
+		if (GLOBAL_REQUEST_ID_COUNTER < id)
+			GLOBAL_REQUEST_ID_COUNTER = id + 10;
+
+		this->id = id;
+	}
+
 	void Request::SetState(State state) noexcept
 	{
 		this->state = state;

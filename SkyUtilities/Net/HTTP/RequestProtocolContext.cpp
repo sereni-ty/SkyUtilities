@@ -6,7 +6,7 @@
 
 namespace SKU::Net::HTTP {
 	
-	void RequestProtocolContext::Initialize(Method method, std::string url, std::string body)
+	void RequestProtocolContext::Initialize()
 	{
 		if (GetOwner() == nullptr)
 		{
@@ -22,6 +22,11 @@ namespace SKU::Net::HTTP {
 		{
 			throw std::bad_exception();
 		}
+	}
+
+	void RequestProtocolContext::Initialize(Method method, std::string url, std::string body)
+	{
+		Initialize();
 
 		this->url = url;
 		this->body = body;

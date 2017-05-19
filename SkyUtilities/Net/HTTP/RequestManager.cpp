@@ -414,4 +414,134 @@ namespace SKU::Net::HTTP {
 		return size*nmemb;
 	}
 
+	void RequestManager::Save(SKSESerializationInterface *serilization_interface)
+	{
+		Plugin::Log(LOGL_VERBOSE, "RequestManager: Saving unprocessed requests.");
+
+		int unprocessed = 0;
+		bool write_fail = true;
+		
+		if ((unprocessed = pool.GetCountByStateExceptions({ Request::sFailed, Request::sOK })) == 0)
+		{
+			return;
+		}
+
+		if (serilization_interface->OpenRecord(PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE, PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION) == false)
+		{
+			Plugin::Log(LOGL_WARNING, "RequestManager: Unable to save data.");
+			return;
+		}
+
+		if (serilization_interface->WriteRecordData((char *)unprocessed, sizeof(int)) == true)
+		{
+			for (Request::Ptr request : pool.Get())
+			{
+				if (request->GetState() == Request::sFailed
+				|| request->GetState() == Request::sOK)
+				{
+					continue;
+				}
+
+				uint32_t tmp;
+				RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+				write_fail = true;
+
+				FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = request->GetID()), 4);
+				FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = request->GetTimeout()), 4);
+
+				FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = ctx->url.size()), 4);
+				FAIL_BREAK_WRITE(serilization_interface, (char *)ctx->url.c_str(), ctx->url.size());
+
+				FAIL_BREAK_WRITE(serilization_interface, (char *)&(tmp = ctx->body.size()), 4);
+				FAIL_BREAK_WRITE(serilization_interface, (char *)ctx->body.c_str(), ctx->body.size());
+
+				FAIL_BREAK_WRITE(serilization_interface, (char *)&ctx->method, sizeof(RequestProtocolContext::Method));
+
+				write_fail = false;
+			}
+		}
+
+		if (write_fail == true)
+		{
+			Plugin::Log(LOGL_WARNING, "RequestManager: Failed to write save data");
+		}
+	}
+
+	void RequestManager::Load(SKSESerializationInterface *serilization_interface)
+	{
+		Plugin::Log(LOGL_VERBOSE, "RequestManager: Loading unprocessed requests.");
+
+		int unprocessed = 0;
+		bool read_fail = false;
+
+		if (serilization_interface->OpenRecord(PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE, PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION) == false
+		|| serilization_interface->ReadRecordData(&unprocessed, sizeof(int) != sizeof(int)))
+		{
+			Plugin::Log(LOGL_WARNING, "RequestManager: Unable to load data from save.");
+			return;
+		}
+		
+		Plugin::Log(LOGL_VERBOSE, "RequestManager: Loading %d requests from save.", unprocessed);
+
+		for (int i = 0; i < unprocessed; i++)
+		{
+			Request::Ptr request = Request::Create<HTTP::RequestProtocolContext>();
+			HTTP::RequestProtocolContext::Ptr ctx = request->GetProtocolContext<HTTP::RequestProtocolContext>();
+
+			size_t tmp;
+			std::vector<char> buf;
+
+			read_fail = true;
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(int)); // id
+			request->SetID((size_t) tmp);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // timeout
+			request->SetTimeout(tmp);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // url size
+
+			try 
+			{
+				buf.resize(tmp + 1);
+			}
+			catch (std::exception)
+			{
+				break;
+			}
+
+			FAIL_BREAK_READ(serilization_interface, &buf[0], tmp); // url
+			ctx->url = std::string(&buf[0]);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // body size
+
+			try
+			{
+				buf.clear();
+				buf.resize(tmp + 1);
+			}
+			catch (std::exception)
+			{
+				break;
+			}
+
+			FAIL_BREAK_READ(serilization_interface, &buf[0], tmp); // body
+			ctx->body = std::string(&buf[0]);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(HTTP::RequestProtocolContext::Method));
+			ctx->method = (HTTP::RequestProtocolContext::Method) tmp;
+
+			ctx->Initialize();
+			AddRequest(request);
+
+			read_fail = false;
+		}
+
+		if (read_fail == true)
+		{
+			Plugin::Log(LOGL_WARNING, "RequestManager: Unable to load data from save");
+			return;
+		}
+	}
+
 }

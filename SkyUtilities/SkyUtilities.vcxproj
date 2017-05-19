@@ -31,9 +31,8 @@
     <ClInclude Include="PapyrusEvent.h" />
     <ClInclude Include="PapyrusEventHandler.h" />
     <ClInclude Include="Plugin.h" />
+    <ClInclude Include="Serialization.h" />
     <ClInclude Include="Singleton.h" />
-    <ClInclude Include="Storage\SaveGame.h" />
-    <ClInclude Include="Storage\StorageInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PapyrusEvent.cpp" />
@@ -45,8 +44,6 @@
     <ClCompile Include="Net\RequestPool.cpp" />
     <ClCompile Include="PapyrusEventHandler.cpp" />
     <ClCompile Include="Plugin.cpp" />
-    <ClCompile Include="Storage\SaveGame.cpp" />
-    <ClCompile Include="Storage\StorageInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Libraries\SKSE\common\common.vcxproj">

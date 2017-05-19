@@ -130,6 +130,16 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
 	}
 
+	void Interface::OnSKSESaveGame(SKSESerializationInterface *serialization_interface)
+	{
+		HTTP::RequestManager::GetInstance()->Save(serialization_interface);
+	}
+
+	void Interface::OnSKSELoadGame(SKSESerializationInterface *serialization_interface)
+	{
+		HTTP::RequestManager::GetInstance()->Load(serialization_interface);
+	}
+
 	std::string Interface::GetEventString(PapyrusEvent event) noexcept
 	{
 		switch (event)

@@ -34,11 +34,13 @@ enum
 #define PLUGIN_RELATIVE_SAVES_PATH "\\My Games\\Skyrim\\Saves\\"
 #define PLUGIN_RELATIVE_LOG_PATH "\\My Games\\Skyrim\\SKSE\\" PLUGIN_NAME ".log"
 
+#define PLUGIN_SERIALIZATION_UID 'SKUS'
+#define PLUGIN_SERIALIZATION_TYPE 'PLSU'
+#define PLUGIN_SERIALIZATION_VERSION 1
+
 namespace SKU {
 
-	//unsigned g_SerializationCounter = 1; // TODO: Placeholder.. think about a unique ID
-
-	class Plugin : public Singleton<Plugin>/*, public IEventDistributor*/
+	class Plugin : public Singleton<Plugin>
 	{
 		IS_SINGLETON_CLASS(Plugin)
 
@@ -52,6 +54,9 @@ namespace SKU {
 
 			static bool OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry*);
 			static void OnSKSEMessageProxy(SKSEMessagingInterface::Message*);
+
+			static void OnSKSESaveGameProxy(SKSESerializationInterface*);
+			static void OnSKSELoadGameProxy(SKSESerializationInterface*);
 
 		public:
 			bool IsGameReady();
