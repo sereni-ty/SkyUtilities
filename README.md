@@ -10,14 +10,10 @@ Right now there is not very much that actually adds to Papyrus except for a basi
 ### Future (or.. *I need features!*)
 
 Planned:
-+ Basic HTTP requests
-  + Response acquisition
-  + Callbacks/Events on state changes
-
 + Writing examples
 
 Thinking about:
-+ Storage of data into separate savegame (Need more information to decide on that one)
++ See [Future][repo_future_link]
 
 **If you need something for your mod which might work as an utility for other mods too, contact me here or in the respective LL support thread (favored).**
 
@@ -36,3 +32,4 @@ A compiler with partial C++17 feature implementation (std::any, nested namespace
 [site_skse]: http://skse.silverlock.org
 [site_curl]: https://curl.haxx.se/
 [site_boost]: http://www.boost.org
+[repo_future_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/Future.md#thoughts
