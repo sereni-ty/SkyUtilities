@@ -38,7 +38,9 @@ namespace SKU {
 
 		//
 		// Event handler
+		event_handler_set.emplace(PapyrusEventHandler::GetInstance());
 		event_handler_set.emplace(Net::Interface::GetInstance());
+		event_handler_set.emplace(Net::HTTP::RequestManager::GetInstance());
 				
 		return true;
 	}
@@ -97,12 +99,10 @@ namespace SKU {
 
 		skse_serialization->SetUniqueID(skse->GetPluginHandle(), PLUGIN_SERIALIZATION_UID);
 		skse_serialization->SetSaveCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
-		skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
+		skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSELoadGameProxy);
 
-		return 
-				skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
-			&&
-				skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
+		return skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
+			&& skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
 	}
 
 	bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry *registry)
@@ -152,7 +152,7 @@ namespace SKU {
 
 	void Plugin::OnSKSESaveGameProxy(SKSESerializationInterface *serialization_interface)
 	{
-		Log(LOGL_VERBOSE, "Plugin: Serialization.");
+		Log(LOGL_INFO, "Plugin: Saving.");
 
 		if (serialization_interface == nullptr)
 		{
@@ -160,15 +160,22 @@ namespace SKU {
 			return;
 		}
 
-		PapyrusEventHandler::GetInstance()->Save(serialization_interface);
-
 		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-			if (event_handler) event_handler->OnSKSESaveGame(serialization_interface);
+		{
+			if (event_handler != nullptr)
+			{
+				event_handler->OnSKSESaveGame(serialization_interface);
+			}
+		}			
+
+		Log(LOGL_INFO, "Plugin: Saved.");
 	}
 
 	void Plugin::OnSKSELoadGameProxy(SKSESerializationInterface *serialization_interface)
 	{
-		Log(LOGL_VERBOSE, "Plugin: Deserialization.");
+		Log(LOGL_INFO, "Plugin: Loading.");
+
+		/* TODO: argument for currently open record to onskseloadgame */
 
 		if (serialization_interface == nullptr)
 		{
@@ -176,10 +183,20 @@ namespace SKU {
 			return;
 		}
 
-		PapyrusEventHandler::GetInstance()->Load(serialization_interface);
+		UInt32 type, version, length;
 
-		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-			if (event_handler) event_handler->OnSKSELoadGame(serialization_interface);
+		while (serialization_interface->GetNextRecordInfo(&type, &version, &length) == true)
+		{
+			for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+			{
+				if (event_handler != nullptr)
+				{
+					event_handler->OnSKSELoadGame(serialization_interface, type, version, length);
+				}
+			}
+		}
+
+		Log(LOGL_INFO, "Plugin: Loaded.");
 	}
 
 	bool Plugin::IsGameReady()
@@ -195,8 +212,8 @@ namespace SKU {
 		va_list args;
 		std::string cfmt;
 		
-		if (level > DEBUG)
-			return;
+		/*if (level > DEBUG)
+			return;*/
 
 		va_start(args, fmt);
 

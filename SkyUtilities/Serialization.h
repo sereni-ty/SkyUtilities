@@ -2,8 +2,8 @@
 
 #include <skse/PluginAPI.h>
 
-#define FAIL_BREAK_WRITE(iface, data, len) if((iface)->WriteRecordData((data), (len)) == false) break;
-#define FAIL_BREAK_READ(iface, data, len) if((iface)->ReadRecordData((data), (len)) != (len)) break;
+#define FAIL_BREAK_WRITE(iface, data, len)	if((iface)->WriteRecordData((data), (len)) == false) break;
+#define FAIL_BREAK_READ(iface, data, len)	if((iface)->ReadRecordData((data), (len)) == 0) break;
 
 namespace SKU
 {

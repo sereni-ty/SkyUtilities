@@ -1,8 +1,10 @@
 #pragma once
 
 #include <skse/PluginAPI.h>
-
 #include <skse/PapyrusArgs.h>
+
+#define FAIL_BREAK_WRITE(iface, data, len)	if((iface)->WriteRecordData((data), (len)) == false) break;
+#define FAIL_BREAK_READ(iface, data, len)	if((iface)->ReadRecordData((data), (len)) == 0) break;
 
 namespace SKU {
 	
@@ -12,7 +14,7 @@ namespace SKU {
 
 		protected:
 			//
-			// Papyurs
+			// Papyrus
 			virtual void OnSKSERegisterPapyrusFunctions(VMClassRegistry*) {}
 
 			//
@@ -22,6 +24,7 @@ namespace SKU {
 			//
 			// Serialization
 			virtual void OnSKSESaveGame(SKSESerializationInterface*) {}
-			virtual void OnSKSELoadGame(SKSESerializationInterface*) {}
+			virtual void OnSKSELoadGame(SKSESerializationInterface*, SInt32 type, SInt32 version, SInt32 length) {}
+			virtual void OnSKSERevertGame(SKSESerializationInterface*) {} // TODO: Check if records are overwriteable 
 	};
 }

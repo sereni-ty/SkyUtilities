@@ -25,12 +25,12 @@ namespace SKU::Net {
 			};
 
 		public:
-			Request() noexcept;
+			Request(int pre_set_id = -1) noexcept;
 			~Request();
 
 		public:
 			template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
-			static Ptr Create();
+			static Ptr Create(int pre_set_id = -1);
 
 		public:
 			void Stop();

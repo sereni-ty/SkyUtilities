@@ -7,10 +7,18 @@ namespace SKU::Net {
 
 	static unsigned GLOBAL_REQUEST_ID_COUNTER = 0;
 
-	Request::Request() noexcept
+	Request::Request(int pre_set_id) noexcept
 		: state(sWaitingForSetup)
 	{
-		id = ++GLOBAL_REQUEST_ID_COUNTER;
+		if (pre_set_id > 0)
+		{
+			id = pre_set_id;
+			GLOBAL_REQUEST_ID_COUNTER = pre_set_id + 1;
+		}
+		else
+		{
+			id = ++GLOBAL_REQUEST_ID_COUNTER;
+		}		
 	}
 
 	Request::~Request()
@@ -45,7 +53,7 @@ namespace SKU::Net {
 		return timeout;
 	}	
 
-	void Request::SetID(int id) noexcept
+	void Request::SetID(int id) noexcept // TODO: check if it's still used
 	{
 		if (GLOBAL_REQUEST_ID_COUNTER < id)
 			GLOBAL_REQUEST_ID_COUNTER = id + 10;

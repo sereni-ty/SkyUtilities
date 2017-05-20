@@ -56,9 +56,6 @@
     <ClInclude Include="PapyrusEventHandler.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization.h">
-      <Filter>Internal</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />

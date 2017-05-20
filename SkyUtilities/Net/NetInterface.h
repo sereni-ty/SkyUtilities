@@ -27,8 +27,6 @@ namespace SKU::Net {
 
 		public:
 			void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept;
-			void OnSKSESaveGame(SKSESerializationInterface *serialization_interface);
-			void OnSKSELoadGame(SKSESerializationInterface *serialization_interface);
 
 		public:
 			enum PapyrusEvent
