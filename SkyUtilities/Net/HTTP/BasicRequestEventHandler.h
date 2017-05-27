@@ -14,7 +14,7 @@ namespace SKU::Net::HTTP {
 			virtual void OnRequestFinished(Request::Ptr request) final;
 
 		public:
-			virtual uint32_t TypeID() final { return 1; } // TODO: I know, I know..
+			static uint32_t TypeID() { return 1; } // TODO: I know, I know..
 	};
 
 }

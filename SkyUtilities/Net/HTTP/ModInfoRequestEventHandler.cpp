@@ -12,17 +12,16 @@
 
 namespace SKU::Net::HTTP {
 
-	void ModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request)
+	void NexusModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request)
 	{
-		Plugin::Log(LOGL_VERBOSE, "ModInfoRequestEventHandler: Handling request (id: %d).",
+		Plugin::Log(LOGL_VERBOSE, "NexusModInfoRequestEventHandler: Handling request (id: %d).",
 			request->GetID());
+	}
 
-		/*RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
-		PapyrusEvent::Args &args = PapyrusEvent::Args{ };
-
-
-
-		PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evModInfoRetrieval), std::move(args));*/
+	void LLabModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request)
+	{
+		Plugin::Log(LOGL_VERBOSE, "LLabModInfoRequestEventHandler: Handling request (id: %d).",
+			request->GetID());
 	}
 
 }

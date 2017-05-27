@@ -4,16 +4,28 @@
 
 namespace SKU::Net::HTTP {
 
-	class ModInfoRequestEventHandler : public RequestEventHandler
+	class NexusModInfoRequestEventHandler : public RequestEventHandler
 	{
 		public:
-			using Ptr = std::shared_ptr<ModInfoRequestEventHandler>;
+			using Ptr = std::shared_ptr<NexusModInfoRequestEventHandler>;
 
 		public:
 			virtual void OnRequestFinished(Request::Ptr request) final;
 
 		public:
-			virtual uint32_t TypeID() final { return 2; } // TODO: I know, I know..
+			static uint32_t TypeID() { return 2; } // TODO: I know, I know..
+	};
+
+	class LLabModInfoRequestEventHandler : public RequestEventHandler
+	{
+		public:
+			using Ptr = std::shared_ptr<LLabModInfoRequestEventHandler>;
+
+		public:
+			virtual void OnRequestFinished(Request::Ptr request) final;
+
+		public:
+			static uint32_t TypeID() { return 3; } // TODO: I know, I know..
 	};
 
 }

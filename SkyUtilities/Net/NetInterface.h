@@ -25,13 +25,13 @@ namespace SKU::Net {
 			static long HTTPGETRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, long timeout);
 			static long HTTPPOSTRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, BSFixedString body, long timeout);
 
-			static long HTTPRequest(TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout);
+			static long GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id);
+			static long GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id);
+
+			static long HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout);
 
 			static BSFixedString URLEncode(StaticFunctionTag*, BSFixedString raw);
 			static BSFixedString URLDecode(StaticFunctionTag*, BSFixedString encoded);
-
-			static long GetNexusModInfo(StaticFunctionTag*, BSFixedString mod_id);
-			static long GetLLabModInfo(StaticFunctionTag*, BSFixedString mod_id);
 
 		public:
 			virtual void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept final;

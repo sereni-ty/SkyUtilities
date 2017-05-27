@@ -57,7 +57,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		if (GetInstance()->stopped == true)
 			return Request::sFailed;
 
-		return Interface::HTTPRequest(form, HTTP::RequestProtocolContext::mGET, std::string(url.data), "", timeout);
+		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string(url.data), "", timeout);
 	}
 
 	long Interface::HTTPPOSTRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, BSFixedString body, long timeout)
@@ -65,10 +65,23 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		if (GetInstance()->stopped == true)
 			return Request::sFailed;
 
-		return Interface::HTTPRequest(form, HTTP::RequestProtocolContext::mGET, std::string(url.data), std::string(body.data), timeout);
+		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string(url.data), std::string(body.data), timeout);
 	}
 
-	long Interface::HTTPRequest(TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
+	long Interface::GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
+	{
+		if (GetInstance()->stopped == true)
+			return Request::sFailed;
+
+		return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)), "", 2500); // TODO: add default timeout
+	}
+
+	long Interface::GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
+	{
+		return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", 2500); // TODO: add default timeout
+	}
+
+	long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
 	{
 		using namespace std::chrono;
 
@@ -224,17 +237,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
 		return decoded.c_str();
 	}
-
-	long Interface::GetNexusModInfo(StaticFunctionTag*, BSFixedString mod_id)
-	{
-		return 0;
-	}
-
-	long Interface::GetLLabModInfo(StaticFunctionTag*, BSFixedString mod_id)
-	{
-		return 0;
-	}
-
+	
 	void Interface::OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept
 	{
 		registry->RegisterFunction(new NativeFunction3<StaticFunctionTag, long, TESForm*, BSFixedString, long>					("HTTPGETRequest", "SKUNet", HTTPGETRequest, registry));
@@ -243,8 +246,8 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLEncode", "SKUNet", URLEncode, registry));
 		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLDecode", "SKUNet", URLDecode, registry));
 
-		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, long, BSFixedString>									("GetNexusModInfo", "SKUNet", GetLLabModInfo, registry));
-		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, long, BSFixedString>									("GetLLabModInfo", "SKUNet", GetLLabModInfo, registry));
+		registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>						("GetNexusModInfo", "SKUNet", GetLLabModInfo, registry));
+		registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>						("GetLLabModInfo", "SKUNet", GetLLabModInfo, registry));
 
 		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
 	}
