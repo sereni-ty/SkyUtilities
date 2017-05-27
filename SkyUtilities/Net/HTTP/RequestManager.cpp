@@ -229,6 +229,7 @@ namespace SKU::Net::HTTP {
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEDATA, (void*) request->GetID());
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
 			curl_easy_setopt(ctx->curl_handle, CURLOPT_TIMEOUT_MS, request->GetTimeout());
+			curl_easy_setopt(ctx->curl_handle, CURLOPT_FOLLOWLOCATION, TRUE);
 
 			switch (ctx->method)
 			{

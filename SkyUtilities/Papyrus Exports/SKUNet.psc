@@ -12,7 +12,7 @@ scriptname SKUNet hidden
 ;
 ; OnModInfoRetrieval:
 ;
-; > event OnModInfoRetrieval(int request_id, string mod_name, string mod_version, string mod_last_updated, string mod_added, string mod_downloads, string mod_views)
+; > event OnModInfoRetrieval(int request_id, bool request_failed, string mod_name, string mod_version, string mod_last_updated, string mod_added, string mod_downloads, string mod_views)
 ; > endEvent
 ;
 
@@ -73,7 +73,7 @@ string function URLDecode(string encoded_str) global native
 ; @param	string	Nexus mod ID ("www.nexusmods.com/skyrim/mods/<mod_id>". Example: "www.nexusmods.com/skyrim/mods/123456/", 123456 would be the id of the mod.)
 ; @return	int	Request id for event 'OnModInfoRetrieval'
 ;
-;int function GetNexusModInfo(Form form, string nexus_mod_id) global native
+int function GetNexusModInfo(Form form, string nexus_mod_id) global native
 
 ;
 ; Starts request to retrieve mod information
@@ -82,6 +82,6 @@ string function URLDecode(string encoded_str) global native
 ; @param	string	LoversLab mod ID ("www.loverslab.com/files/file/<mod_id>-some-mods-name/". Example: ""www.loverslab.com/files/file/123456-some-mods-name/", 123456 would be the id of the mod.)
 ; @return	int	Request id for event 'OnModInfoRetrieval'
 ;
-;int function GetLLabModInfo(Form form, string ll_mod_id) global native
+int function GetLLabModInfo(Form form, string ll_mod_id) global native
 
 

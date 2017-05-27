@@ -2,7 +2,8 @@
 #include "Net/Request.h"
 #include "Net/RequestEventHandler.h"
 
-namespace SKU::Net::HTTP {
+namespace SKU::Net::HTTP { // TODO: implement / adjust serialization 
+	// TODO: Add failure boolean value to event
 
 	class NexusModInfoRequestEventHandler : public RequestEventHandler
 	{
@@ -13,7 +14,7 @@ namespace SKU::Net::HTTP {
 			virtual void OnRequestFinished(Request::Ptr request) final;
 
 		public:
-			static uint32_t TypeID() { return 2; } // TODO: I know, I know..
+			static const uint32_t TypeID = 2; // TODO: I know, I know..
 	};
 
 	class LLabModInfoRequestEventHandler : public RequestEventHandler
@@ -25,7 +26,7 @@ namespace SKU::Net::HTTP {
 			virtual void OnRequestFinished(Request::Ptr request) final;
 
 		public:
-			static uint32_t TypeID() { return 3; } // TODO: I know, I know..
+			static const uint32_t TypeID = 3; // TODO: I know, I know..
 	};
 
 }

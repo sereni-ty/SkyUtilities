@@ -15,7 +15,7 @@ namespace SKU::Net {
 			virtual void OnRequestFinished(std::shared_ptr<Request> request) {}
 
 		public:
-			static uint32_t TypeID() { return 0; } // TODO: I know, I know..
+			static const uint32_t TypeID = 0; // TODO: I know, I know..
 	};
 
 }

@@ -57,7 +57,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		if (GetInstance()->stopped == true)
 			return Request::sFailed;
 
-		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string(url.data), "", timeout);
+		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string(url.data), "", timeout);
 	}
 
 	long Interface::HTTPPOSTRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, BSFixedString body, long timeout)
@@ -65,7 +65,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		if (GetInstance()->stopped == true)
 			return Request::sFailed;
 
-		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string(url.data), std::string(body.data), timeout);
+		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string(url.data), std::string(body.data), timeout);
 	}
 
 	long Interface::GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
@@ -73,12 +73,12 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		if (GetInstance()->stopped == true)
 			return Request::sFailed;
 
-		return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)), "", 2500); // TODO: add default timeout
+		return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)), "", 25000); // TODO: add default timeout
 	}
 
 	long Interface::GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
 	{
-		return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID(), form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", 2500); // TODO: add default timeout
+		return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", 25000); // TODO: add default timeout
 	}
 
 	long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
@@ -151,16 +151,33 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		{
 			Request::Ptr request = Request::Create<HTTP::RequestProtocolContext>();
 
-			request->SetHandler(std::make_shared<HTTP::BasicRequestEventHandler>());
 			request->SetTimeout(timeout);
-
 			request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
 			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request))
 			{
 				if (form != nullptr)
 				{
-					PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
+					switch (request_handler_type_id)
+					{
+						case HTTP::BasicRequestEventHandler::TypeID:
+						{
+							request->SetHandler(std::make_shared<HTTP::BasicRequestEventHandler>());
+							PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
+						} break;
+
+						case HTTP::NexusModInfoRequestEventHandler::TypeID:
+						{
+							request->SetHandler(std::make_shared<HTTP::NexusModInfoRequestEventHandler>());
+							PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evModInfoRetrieval), form);
+						} break;
+
+						case HTTP::LLabModInfoRequestEventHandler::TypeID:
+						{
+							request->SetHandler(std::make_shared<HTTP::LLabModInfoRequestEventHandler>());
+							PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evModInfoRetrieval), form);
+						} break;
+					}
 				}
 
 				return request->GetID();
