@@ -8,6 +8,10 @@
 struct StaticFunctionTag;
 class TESForm;
 
+#define REQUESTS_LIMIT_PER_TIMEFRAME 5
+#define REQUESTS_LIMIT_TIMEFRAME 1000 // ms 
+#define REQUESTS_LIMIT_EXCEEDINGS_PERMITTED 3
+
 namespace SKU::Net {
 
 	class Interface : public Singleton<Interface>, public IEventHandler

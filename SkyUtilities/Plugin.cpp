@@ -16,6 +16,7 @@
 #include <list>
 
 // TODO: create test classes to test if TEST macro is set just after "game ready" has been set
+// TODO: might need a configuration file (net: requests per seconds, max response size)
 
 namespace SKU {
 

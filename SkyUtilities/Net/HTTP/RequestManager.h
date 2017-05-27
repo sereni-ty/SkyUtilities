@@ -12,7 +12,7 @@
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE MACRO_SWAP32('RMSU')
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION 1
 
-#define RESPONSE_MAX_SIZE 1024 * 128 
+#define RESPONSE_MAX_SIZE 1024 * 128 // TODO: Configuration
 
 namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency
 

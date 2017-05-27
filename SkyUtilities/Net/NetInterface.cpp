@@ -14,6 +14,8 @@
 #include <skse/GameForms.h>
 
 #include <exception>
+#include <chrono>
+#include <vector>
 
 namespace SKU::Net { // TODO: Consider writing class with control management (Start, Stop, ..), e.g. InterfaceBase (Start, Stop, Initialize)
 
@@ -68,9 +70,69 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
 	long Interface::HTTPRequest(TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
 	{
+		using namespace std::chrono;
+
+		struct ScriptCallsTimeInformation 
+		{
+			std::vector<steady_clock::time_point> last_known_calls;
+
+			uint8_t limit_exceeding_count;
+		};
+
+		static std::unordered_set<TESForm *> script_blacklist;
+		static std::unordered_map<TESForm *, ScriptCallsTimeInformation> script_calls;
+
+		steady_clock::time_point current_time = steady_clock::now();
+
+		if (script_blacklist.find(form) != script_blacklist.end())
+		{
+			return Request::sBlacklisted;
+		}
+
+		if (script_calls.find(form) != script_calls.end())
+		{
+			ScriptCallsTimeInformation &info = script_calls.at(form);
+			info.last_known_calls.push_back(current_time);
+			
+			if (info.last_known_calls.size() == REQUESTS_LIMIT_PER_TIMEFRAME)
+			{
+				while (duration_cast<milliseconds>(current_time - info.last_known_calls.back()).count() < REQUESTS_LIMIT_TIMEFRAME)
+				{
+					info.last_known_calls.pop_back();
+				}
+
+				if (info.last_known_calls.size() == 0)
+				{
+					if (++info.limit_exceeding_count <= REQUESTS_LIMIT_EXCEEDINGS_PERMITTED)
+					{
+						Plugin::Log(LOGL_INFO, "Net: A specific script exceeded the request limit of %d in a time frame of %dms. Limit exceeded %d times.",
+							REQUESTS_LIMIT_PER_TIMEFRAME, REQUESTS_LIMIT_TIMEFRAME, info.limit_exceeding_count);
+					}
+					else
+					{
+						Plugin::Log(LOGL_INFO, "Net: A specific script exceeded the request limit too often and was blacklisted.");
+						script_blacklist.emplace(form);
+						return Request::sBlacklisted;
+					}					
+				}
+				else
+				{
+					info.last_known_calls.clear();
+				}
+			}
+		}
+		else
+		{
+			ScriptCallsTimeInformation info;
+			info.limit_exceeding_count = 0;
+
+			script_calls.emplace(form, std::move(info));
+		}
+
 		if (Plugin::GetInstance()->IsGameReady() == false)	// Note: Just a precaution. Shouldn't happen: If the script was able to call a function
-			return Request::sFailed;						// (well, this one in this case) SKSE should've sent a message notification and thus 
-															// the method should always return true.
+		{													// (well, this one in this case) SKSE should've sent a message notification and thus 
+			return Request::sFailed;						// the method should always return true.
+		}
 
 		try
 		{
@@ -81,15 +143,15 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
 			request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
-			if(form != nullptr)
-			{
-				PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
-			}
-
 			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request))
 			{
+				if (form != nullptr)
+				{
+					PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
+				}
+
 				return request->GetID();
-			}
+			}			
 		}
 		catch (std::bad_exception)
 		{

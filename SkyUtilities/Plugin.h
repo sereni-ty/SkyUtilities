@@ -66,6 +66,9 @@ namespace SKU {
 			static void Log(unsigned int level, const char *fmt, ...);
 
 		private:
+			//static std::unordered_map<std::string, std::string> Configuration();
+
+		private:
 			std::set<IEventHandler*> event_handler_set;
 
 			bool is_plugin_active;

@@ -19,8 +19,11 @@ namespace SKU::Net {
 		public:
 			enum State
 			{
+				sBlacklisted = -2,		// Blocked from adding requests indefinitely
+				
 				sFailed = 0,
 				sOK = 1,
+
 				sWaitingForSetup,
 				sReady,
 				sPending,

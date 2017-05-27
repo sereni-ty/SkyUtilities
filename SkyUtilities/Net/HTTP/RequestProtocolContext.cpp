@@ -39,6 +39,8 @@ namespace SKU::Net::HTTP {
 	{
 		Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestProtocolContext: Cleaning up request (id: %d).", GetOwner()->GetID());
 
+		IRequestProtocolContext::Cleanup();
+
 		if (curl_handle != nullptr)
 		{
 			curl_easy_cleanup(curl_handle);

@@ -21,7 +21,7 @@ namespace SKU::Net {
 
 		public:
 			virtual void Initialize() {};
-			virtual void Cleanup() {};
+			virtual void Cleanup() { response.clear();  };
 
 		public:
 			virtual std::string GetResponse() noexcept { return response; }
