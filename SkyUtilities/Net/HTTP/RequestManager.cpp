@@ -21,6 +21,27 @@ namespace SKU::Net::HTTP {
 		Stop();
 	}
 
+	inline Request::Ptr RequestManager::GetRequestByHandle(CURL *curl_handle)
+	{
+		for (Request::Ptr request : pool.Get())
+		{
+			if (request->GetProtocolContext<RequestProtocolContext>()->curl_handle == curl_handle)
+			{
+				return request;
+			}
+		}
+
+		return nullptr;
+	}
+
+	void RequestManager::Initialize()
+	{
+		if(curl_handle == nullptr)
+		{
+			curl_handle = curl_multi_init();
+		}		
+	}
+
 	void RequestManager::Stop()
 	{
 		should_run = false;
@@ -78,10 +99,9 @@ namespace SKU::Net::HTTP {
 
 		Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Start");
 
-		should_run = true;
+		Initialize();
 
-		if (curl_handle == nullptr)
-			curl_handle = curl_multi_init();
+		should_run = true;
 
 		if (processing_thread.valid() == false 
 		|| processing_thread.wait_for(std::chrono::seconds(0)) != std::future_status::timeout)
@@ -89,29 +109,6 @@ namespace SKU::Net::HTTP {
 			Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Starting Thread (again)");
 			processing_thread = std::move(std::async(RequestManager::Process));
 		}
-	}
-
-	void RequestManager::RemoveRequest(Request::Ptr request)
-	{
-		if (request == nullptr)
-		{
-			return;
-		}
-
-		request->Lock();
-
-		curl_multi_remove_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
-
-		request->Stop();
-
-		Request::State state = request->GetState();
-
-		if (state != Request::sOK && state != Request::sFailed)
-		{
-			request->SetState(Request::sFailed); // TODO: (Consideration) Necessary to implement a separate state for stopped requests?
-		}
-
-		request->Unlock();
 	}
 
 	void RequestManager::Process()
@@ -185,8 +182,12 @@ namespace SKU::Net::HTTP {
 						Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Resetting bad curl handle.");
 
 						for (Request::Ptr& request : mgr->pool.GetRequestsByState(Request::sPending))
+						{
 							if (request != nullptr)
+							{
 								request->SetState(Request::sReady);
+							}
+						}
 
 						mgr->curl_handle = curl_multi_init();
 
@@ -311,25 +312,6 @@ namespace SKU::Net::HTTP {
 		int message_count;
 		CURLMsg *info;
 
-		auto fnGetRequestByHandle = [&](CURL* curl_handle, std::vector<Request::Ptr> &requests) -> Request::Ptr {
-			Request::Ptr found_request;
-
-			for (Request::Ptr request : requests)
-			{
-				if (request->GetProtocolContext<RequestProtocolContext>()->curl_handle == curl_handle)
-				{
-					found_request = request;
-				}
-			}
-
-			return found_request;
-		};
-
-		/* get pending requests, there's no need to iterate through the whole set */
-		auto requests = std::move(pool.GetRequestsByState(Request::sPending));
-
-		Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: %d requests being processed", requests.size());
-
 		while ((info = curl_multi_info_read(curl_handle, &message_count))/* && message_count > 0*/)	// message_count seems to be irrelevant since it'll return 
 		{																							// nullptr anyway if there is nothing to do anymore	
 			handled_requests++;
@@ -340,11 +322,11 @@ namespace SKU::Net::HTTP {
 				continue;
 			}
 			
-			Request::Ptr &request = fnGetRequestByHandle(info->easy_handle, requests);
+			Request::Ptr &request = GetRequestByHandle(info->easy_handle);
 
 			if (request == nullptr) // Request not found. 
 			{						// TODO: Request state was changed? Check that.
-				Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Request was answered but (internally) not found.");
+				Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Request was answered but (internally) not found."); 
 
 				curl_easy_cleanup(info->easy_handle); // Let the dead rest.				
 				continue;
@@ -352,7 +334,7 @@ namespace SKU::Net::HTTP {
 
 			request->Lock();
 
-			if (request->GetState() <= Request::sOK)	// Was cleaned up before but curl apparently had
+			if (request->GetState() <= Request::sOK)	// Was cleaned up / stopped before but curl apparently had
 			{											// several messages in its queue for this request.
 				request->Unlock();
 				continue;
@@ -361,33 +343,28 @@ namespace SKU::Net::HTTP {
 			RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
 			request->SetState(info->data.result == CURLE_OK ? Request::sOK : Request::sFailed);
-			ctx->curl_last_error = info->data.result;
+			ctx->curl_last_error = info->data.result; // TODO: Think about how to pass info data..
 
 			curl_last_error = curl_multi_remove_handle(curl_handle, ctx->curl_handle);
 
-			Plugin::Log(LOGL_DETAILED, "Request (id: %d, error code: %d) has %s", 
-				request->GetID(), 
+			Plugin::Log(LOGL_DETAILED, "Request (id: %d, error code: %d) has %s",
+				request->GetID(),
 				info->data.result,
 				info->data.result == CURLE_OK ? "finished successfully" : "failed");
 
-			PapyrusEvent::Args &args = PapyrusEvent::Args { std::make_any<int>(request->GetID()), std::make_any<bool>(request->GetState() == Request::sFailed) };
-
-			if (info->data.result == CURLE_OK)
+			if (request->GetHandler() == nullptr)
 			{
-				long response_code;
-				curl_easy_getinfo(ctx->curl_handle, CURLINFO_RESPONSE_CODE, &response_code);
-
-				args.emplace_back(std::make_any<int>(response_code));
-				args.emplace_back(std::make_any<std::string>(ctx->response));
+				Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) has no handler to call. Skipping.",
+					request->GetID());
 			}
 			else
 			{
-				args.emplace_back(std::make_any<int>(-1));
-				args.emplace_back(std::make_any<std::string>());
+				Plugin::Log(LOGL_VERBOSE, "RequestManager: Calling request (id: %d) handler.",
+					request->GetID());
+
+				request->GetHandler()->OnRequestFinished(request);
 			}
-
-			PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evHTTPRequestFinished), std::move(args));
-
+			
 			request->Stop();
 			request->Unlock();
 
@@ -400,12 +377,68 @@ namespace SKU::Net::HTTP {
 		return handled_requests > 0;
 	}
 
+	void RequestManager::OnRequestAdded(Request::Ptr request)
+	{
+		if (request == nullptr)
+		{
+			return;
+		}
+
+		Initialize();
+
+		if (request->GetState() != Request::sFailed)
+		{
+			curl_multi_add_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
+		}
+
+		Start();
+	}
+
+	void RequestManager::OnRequestRemoval(Request::Ptr request)
+	{
+		if (request == nullptr || curl_handle == nullptr)
+		{
+			return;
+		}
+
+		request->Lock();
+
+		curl_multi_remove_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
+
+		request->Stop();
+
+		Request::State state = request->GetState();
+
+		if (state != Request::sOK && state != Request::sFailed)
+		{
+			request->SetState(Request::sFailed); // TODO: (Consideration) Necessary to implement a separate state for stopped requests?
+		}
+
+		request->Unlock();
+	}
+
 	size_t RequestManager::OnRequestResponse(char* data, size_t size, size_t nmemb, void *request_id)
 	{
 		Request::Ptr &request = RequestManager::GetInstance()->pool.GetRequestByID((int)request_id);
 
 		if (request == nullptr)
+		{
 			return -1;
+		}
+
+		RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+		size_t new_size = nmemb*size + ctx->response.size();
+
+		if (new_size > RESPONSE_MAX_SIZE)
+		{
+			Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) exceeded response limit (%dKB). Stopping request.", 
+				request->GetID(), RESPONSE_MAX_SIZE / 1024);
+
+			request->SetState(Request::sFailed);
+			//request->Stop(); 
+
+			return -1;
+		}
 
 		Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) was answered with %d bytes.", (int)request_id, size*nmemb);
 

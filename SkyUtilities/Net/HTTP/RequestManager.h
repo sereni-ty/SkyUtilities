@@ -12,18 +12,22 @@
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE MACRO_SWAP32('RMSU')
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION 1
 
-namespace SKU::Net::HTTP {
+#define RESPONSE_MAX_SIZE 1024 * 128 
+
+namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency
 
 	class RequestManager : public Singleton<RequestManager>, public SKU::Net::RequestManagerBase, public IEventHandler
 	{
 		IS_SINGLETON_CLASS(RequestManager)
 
+		private:
+			Request::Ptr GetRequestByHandle(CURL *curl_handle);
+
 		public:
+			void Initialize();
+
 			void Stop();
 			void Start();
-			
-		public:
-			void RemoveRequest(Request::Ptr request);
 
 		public:
 			static void Process();
@@ -32,6 +36,10 @@ namespace SKU::Net::HTTP {
 			bool SetupRequests();
 			bool PerformRequests();
 			bool CheckPendingRequests();
+		
+		public:
+			virtual void OnRequestAdded(Request::Ptr request) override;
+			virtual void OnRequestRemoval(Request::Ptr request) override;
 
 		public:
 			static size_t OnRequestResponse(char* data, size_t size, size_t nmemb, void *request_id);

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Lockable.h"
+
 #include "Net/RequestProtocolContext.h"
+#include "Net/RequestEventHandler.h"
 
 #include <string>
 #include <memory>
@@ -39,6 +41,7 @@ namespace SKU::Net {
 			int GetID() noexcept;
 			State GetState() noexcept;
 			unsigned GetTimeout() noexcept; // Timeout in ms
+			RequestEventHandler::Ptr GetHandler();
 
 			template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
 			typename ProtocolContextType::Ptr GetProtocolContext();
@@ -47,12 +50,15 @@ namespace SKU::Net {
 			void SetID(int id) noexcept;
 			void SetState(State state) noexcept;
 			void SetTimeout(unsigned ms) noexcept;
+			void SetHandler(RequestEventHandler::Ptr handler);
 
 		private:
 			int id;
 			State state;
 			IRequestProtocolContext::Ptr proto_ctx;
 			unsigned timeout;
+
+			RequestEventHandler::Ptr handler;
 
 			std::mutex mtx;
 	};

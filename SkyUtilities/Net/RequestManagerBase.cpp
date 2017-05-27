@@ -4,7 +4,7 @@
 
 namespace SKU::Net {
 	
-	bool RequestManagerBase::AddRequest(Request::Ptr request, bool proccess_immediately) noexcept
+	bool RequestManagerBase::AddRequest(Request::Ptr request) noexcept
 	{
 		try
 		{
@@ -15,14 +15,15 @@ namespace SKU::Net {
 			return false;
 		}
 
-		if(proccess_immediately)
-			Start();
+		OnRequestAdded(request);
 
 		return true;
 	}
 
 	void RequestManagerBase::RemoveRequest(Request::Ptr request)
 	{
+		OnRequestRemoval(request);
+
 		try
 		{
 			pool.Get().erase(request);

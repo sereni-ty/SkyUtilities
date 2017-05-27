@@ -56,6 +56,15 @@
     <ClInclude Include="PapyrusEventHandler.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="Net\RequestEventHandler.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\HTTP\BasicRequestEventHandler.h">
+      <Filter>Net\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Net\HTTP\ModInfoRequestEventHandler.h">
+      <Filter>Net\HTTP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />
@@ -83,6 +92,12 @@
     <ClCompile Include="PapyrusEventHandler.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp">
+      <Filter>Net\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp">
+      <Filter>Net\HTTP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Papyrus Exports\SKUNet.psc">
@@ -90,6 +105,9 @@
     </None>
     <None Include="Net\Request.inl">
       <Filter>Net</Filter>
+    </None>
+    <None Include="Papyrus Exports\SKUPlugin.psc">
+      <Filter>Papyrus Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -53,6 +53,11 @@ namespace SKU::Net {
 		return timeout;
 	}	
 
+	RequestEventHandler::Ptr Request::GetHandler()
+	{
+		return handler;
+	}
+
 	void Request::SetID(int id) noexcept // TODO: check if it's still used
 	{
 		if (GLOBAL_REQUEST_ID_COUNTER < id)
@@ -71,4 +76,8 @@ namespace SKU::Net {
 		timeout = ms;
 	}
 
+	void Request::SetHandler(RequestEventHandler::Ptr handler)
+	{
+		this->handler.swap(handler);
+	}
 }

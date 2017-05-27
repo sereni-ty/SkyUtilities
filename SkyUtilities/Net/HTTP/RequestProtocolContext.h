@@ -23,7 +23,7 @@ namespace SKU::Net::HTTP {
 			void Initialize();
 			void Initialize(Method method, std::string url, std::string body);
 			void Cleanup();
-
+			
 		protected:
 			CURL *curl_handle;
 			CURLcode curl_last_error;
@@ -32,6 +32,8 @@ namespace SKU::Net::HTTP {
 			Method method;
 
 		friend class RequestManager;
+		friend class BasicRequestEventHandler;
+		friend class ModInfoRequestEventHandler;
 	};
 
 }

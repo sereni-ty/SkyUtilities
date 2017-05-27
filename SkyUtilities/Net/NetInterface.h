@@ -24,14 +24,19 @@ namespace SKU::Net {
 			static long HTTPRequest(TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout);
 
 			static BSFixedString URLEncode(StaticFunctionTag*, BSFixedString raw);
+			static BSFixedString URLDecode(StaticFunctionTag*, BSFixedString encoded);
+
+			static long GetNexusModInfo(StaticFunctionTag*, BSFixedString mod_id);
+			static long GetLLabModInfo(StaticFunctionTag*, BSFixedString mod_id);
 
 		public:
-			void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept;
-
+			virtual void OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept final;
+			
 		public:
 			enum PapyrusEvent
 			{
-				evHTTPRequestFinished
+				evHTTPRequestFinished,
+				evModInfoRetrieval
 			};
 
 			static std::string GetEventString(PapyrusEvent event) noexcept;

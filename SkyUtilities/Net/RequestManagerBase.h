@@ -1,19 +1,26 @@
 #pragma once
 
-#include "Singleton.h"
-
 #include "Net/RequestPool.h"
 
-namespace SKU::Net {
+#include <memory>
 
+namespace SKU::Net {
+	
 	class RequestManagerBase
 	{
 		public:
-			bool AddRequest(Request::Ptr request, bool proccess_immediately = false) noexcept;
+			bool AddRequest(Request::Ptr request) noexcept;
 			virtual void RemoveRequest(Request::Ptr request);
+
 			Request::Ptr GetRequestByID(unsigned request_id) noexcept;
 
+		protected:
+			virtual void OnRequestAdded(Request::Ptr request) {}
+			virtual void OnRequestRemoval(Request::Ptr request) {}
+
 		public:
+			virtual void Initialize() = 0;
+
 			virtual void Stop() = 0;
 			virtual void Start() = 0;
 

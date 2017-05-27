@@ -21,11 +21,14 @@
   <ItemGroup>
     <ClInclude Include="Events.h" />
     <ClInclude Include="Lockable.h" />
+    <ClInclude Include="Net\HTTP\BasicRequestEventHandler.h" />
+    <ClInclude Include="Net\HTTP\ModInfoRequestEventHandler.h" />
     <ClInclude Include="Net\HTTP\RequestManager.h" />
     <ClInclude Include="Net\HTTP\RequestProtocolContext.h" />
     <ClInclude Include="Net\NetInterface.h" />
     <ClInclude Include="Net\Request.h" />
     <ClInclude Include="Net\RequestManagerBase.h" />
+    <ClInclude Include="Net\RequestEventHandler.h" />
     <ClInclude Include="Net\RequestPool.h" />
     <ClInclude Include="Net\RequestProtocolContext.h" />
     <ClInclude Include="PapyrusEvent.h" />
@@ -34,6 +37,8 @@
     <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp" />
+    <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp" />
     <ClCompile Include="PapyrusEvent.cpp" />
     <ClCompile Include="Net\HTTP\RequestManager.cpp" />
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp" />
@@ -54,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Net\Request.inl" />
+    <None Include="Papyrus Exports\SKUPlugin.psc" />
     <None Include="Papyrus Exports\SKUNet.psc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

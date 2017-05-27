@@ -2,7 +2,11 @@
 #include "PapyrusEventHandler.h"
 
 #include "Net/NetInterface.h"
+#include "Net/RequestEventHandler.h"
 #include "Net/Request.h"
+
+#include "Net/HTTP/BasicRequestEventHandler.h"
+#include "Net/HTTP/ModInfoRequestEventHandler.h"
 #include "Net/HTTP/RequestProtocolContext.h"
 #include "Net/HTTP/RequestManager.h"
 
@@ -18,7 +22,9 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 	{
 		Plugin::Log(LOGL_INFO, "Net: Initializing.");
 		Plugin::Log(LOGL_DETAILED, "Net: Enabling events");
+
 		PapyrusEventHandler::GetInstance()->Register(GetEventString(evHTTPRequestFinished));
+		PapyrusEventHandler::GetInstance()->Register(GetEventString(evModInfoRetrieval));
 	}
 
 	Interface::~Interface() 
@@ -32,6 +38,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 			return;
 
 		// events
+		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evModInfoRetrieval));
 		PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evHTTPRequestFinished));
 
 		// request managers
@@ -69,13 +76,17 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		{
 			Request::Ptr request = Request::Create<HTTP::RequestProtocolContext>();
 
+			request->SetHandler(std::make_shared<HTTP::BasicRequestEventHandler>());
 			request->SetTimeout(timeout);
+
 			request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
 			if(form != nullptr)
+			{
 				PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
+			}
 
-			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request, true))
+			if (true == HTTP::RequestManager::GetInstance()->AddRequest(request))
 			{
 				return request->GetID();
 			}
@@ -113,7 +124,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 			}
 			else // OOM
 			{
-				Plugin::Log(LOGL_CRITICAL, "Stopping Plugin.");
+				Plugin::Log(LOGL_CRITICAL, "OOM. Stopping Plugin.");
 				Plugin::GetInstance()->Stop();
 			}
 		}
@@ -121,20 +132,67 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		return encoded.c_str();
 	}
 
+	BSFixedString Interface::URLDecode(StaticFunctionTag*, BSFixedString encoded)
+	{
+		std::string decoded;
+		size_t encoded_len;
+		CURL *curl;
+
+		if (encoded.data != nullptr
+		&& (encoded_len = strlen(encoded.data)) > 0)
+		{
+			if ((curl = curl_easy_init()) != nullptr)
+			{
+				char *output = curl_easy_escape(curl, encoded.data, encoded_len);
+
+				if (output != nullptr)
+				{
+					decoded.assign(output);
+					curl_free(output);
+				}
+
+				curl_easy_cleanup(curl);
+			}
+			else // OOM
+			{
+				Plugin::Log(LOGL_CRITICAL, "OOM. Stopping Plugin.");
+				Plugin::GetInstance()->Stop();
+			}
+		}
+
+		return decoded.c_str();
+	}
+
+	long Interface::GetNexusModInfo(StaticFunctionTag*, BSFixedString mod_id)
+	{
+		return 0;
+	}
+
+	long Interface::GetLLabModInfo(StaticFunctionTag*, BSFixedString mod_id)
+	{
+		return 0;
+	}
+
 	void Interface::OnSKSERegisterPapyrusFunctions(VMClassRegistry *registry) noexcept
 	{
 		registry->RegisterFunction(new NativeFunction3<StaticFunctionTag, long, TESForm*, BSFixedString, long>					("HTTPGETRequest", "SKUNet", HTTPGETRequest, registry));
 		registry->RegisterFunction(new NativeFunction4<StaticFunctionTag, long, TESForm*, BSFixedString, BSFixedString, long>	("HTTPPOSTRequest", "SKUNet", HTTPPOSTRequest, registry));
+
 		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLEncode", "SKUNet", URLEncode, registry));
+		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLDecode", "SKUNet", URLDecode, registry));
+
+		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, long, BSFixedString>									("GetNexusModInfo", "SKUNet", GetLLabModInfo, registry));
+		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, long, BSFixedString>									("GetLLabModInfo", "SKUNet", GetLLabModInfo, registry));
 
 		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
 	}
 	
-	std::string Interface::GetEventString(PapyrusEvent event) noexcept
+	inline std::string Interface::GetEventString(PapyrusEvent event) noexcept
 	{
 		switch (event)
 		{
 			case evHTTPRequestFinished: return "OnHTTPRequestFinished";
+			case evModInfoRetrieval:	return "OnModInfoRetrieval";
 			default: return "";
 		}
 	}

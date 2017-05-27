@@ -37,11 +37,12 @@ namespace SKU::Net::HTTP {
 
 	void RequestProtocolContext::Cleanup()
 	{
+		Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestProtocolContext: Cleaning up request (id: %d).", GetOwner()->GetID());
+
 		if (curl_handle != nullptr)
 		{
 			curl_easy_cleanup(curl_handle);
 			curl_handle = nullptr;
 		}
 	}
-
 }

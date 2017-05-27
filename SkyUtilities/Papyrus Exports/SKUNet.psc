@@ -8,7 +8,13 @@ scriptname SKUNet hidden
 ; > event OnHTTPRequestFinished(int request_id, bool request_failed, int response_code, string response_body) 
 ; > endEvent
 ;
-
+; ---------------------------------------------------------
+;
+; OnModInfoRetrieval:
+;
+; > event OnModInfoRetrieval(int request_id, string mod_name, string mod_version, string mod_last_updated, string mod_added, string mod_downloads, string mod_views)
+; > endEvent
+;
 
 ; =========================================================
 ; FUNCTIONS (STATIC)
@@ -38,32 +44,42 @@ int function HTTPPOSTRequest(Form form, string url, string data, int timeout) gl
 int function HTTPGETRequest(Form form, string url, int timeout) global native
 
 ;
-; The function name pretty much says it all. For more information see: https://curl.haxx.se/libcurl/c/curl_easy_escape.html
+; Encodes string into an URL encoded one. For further information see: https://curl.haxx.se/libcurl/c/curl_easy_escape.html
 ;
 ; @param 	string	raw string
 ; @return	string	URL encoded string
 ;
 ;
-string function URLEncode(string data) global native
+string function URLEncode(string raw_str) global native
+
+
+;
+; Decodes an URL encoded string into a normal string. For further information see: https://curl.haxx.se/libcurl/c/curl_easy_unescape.html
+;
+; @param 	string	encoded string
+; @return	string	URL decoded string
+;
+;
+string function URLDecode(string encoded_str) global native
 
 ; ======================
 ;  NOT IMPLEMENTED YET:
 ; ======================
 
 ;
-; Returns latest mod version 
+; Starts request to retrieve mod information
 ;
 ; @param	string	Nexus mod ID ("www.nexusmods.com/skyrim/mods/<mod_id>". Example: "www.nexusmods.com/skyrim/mods/123456/", 123456 would be the id of the mod.)
-; @return	string	Latest, released mod version
+; @return	int	Request id for event 'OnModInfoRetrieval'
 ;
-;string GetNexusModVersion(string nexus_mod_id) global native
+;int function GetNexusModInfo(string nexus_mod_id) global native
 
 ;
-; Returns latest mod version 
+; Starts request to retrieve mod information
 ;
-; @param	string	Nexus mod ID ("www.loverslab.com/files/file/<mod_id>-some-mods-name/". Example: ""www.loverslab.com/files/file/123456-some-mods-name/", 123456 would be the id of the mod.)
-; @return	string	Latest, released mod version
+; @param	string	LoversLab mod ID ("www.loverslab.com/files/file/<mod_id>-some-mods-name/". Example: ""www.loverslab.com/files/file/123456-some-mods-name/", 123456 would be the id of the mod.)
+; @return	int	Request id for event 'OnModInfoRetrieval'
 ;
-;string GetLLabModVersion(string ll_mod_id) global native
+;int function GetLLabModInfo(string ll_mod_id) global native
 
 
