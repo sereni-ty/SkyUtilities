@@ -9,7 +9,7 @@ There aren't much features at the moment but I'm getting there. Right now there 
 
 Requests do not block. Responses are distributed via events. Events and requests alike are serializeable which basically means that open requests are saved into the SKSE save game and continued (as it should) after loading the save game.
 
-For mor information see **Future**.
+For more information see **Future**.
 
 ### Future (or.. *I need features!*)
 
