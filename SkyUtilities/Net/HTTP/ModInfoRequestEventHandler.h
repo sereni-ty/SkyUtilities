@@ -2,8 +2,7 @@
 #include "Net/Request.h"
 #include "Net/RequestEventHandler.h"
 
-namespace SKU::Net::HTTP { // TODO: implement / adjust serialization 
-	// TODO: Add failure boolean value to event
+namespace SKU::Net::HTTP { // TODO: Add failure boolean value to event	
 
 	class NexusModInfoRequestEventHandler : public RequestEventHandler
 	{

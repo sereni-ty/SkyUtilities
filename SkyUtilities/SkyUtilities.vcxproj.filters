@@ -106,8 +106,5 @@
     <None Include="Net\Request.inl">
       <Filter>Net</Filter>
     </None>
-    <None Include="Papyrus Exports\SKUPlugin.psc">
-      <Filter>Papyrus Scripts</Filter>
-    </None>
   </ItemGroup>
 </Project>

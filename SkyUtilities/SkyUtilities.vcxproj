@@ -59,7 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Net\Request.inl" />
-    <None Include="Papyrus Exports\SKUPlugin.psc" />
     <None Include="Papyrus Exports\SKUNet.psc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

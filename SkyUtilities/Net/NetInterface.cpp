@@ -54,26 +54,17 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
 	long Interface::HTTPGETRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, long timeout)
 	{
-		if (GetInstance()->stopped == true)
-			return Request::sFailed;
-
 		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string(url.data), "", timeout);
 	}
 
 	long Interface::HTTPPOSTRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, BSFixedString body, long timeout)
 	{
-		if (GetInstance()->stopped == true)
-			return Request::sFailed;
-
 		return Interface::HTTPRequest(HTTP::BasicRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string(url.data), std::string(body.data), timeout);
 	}
 
 	long Interface::GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
 	{
-		if (GetInstance()->stopped == true)
-			return Request::sFailed;
-
-		return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)), "", 25000); // TODO: add default timeout
+		return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)) + "/?", "", 25000); // TODO: add default timeout
 	}
 
 	long Interface::GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
@@ -96,6 +87,9 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		static std::unordered_map<TESForm *, ScriptCallsTimeInformation> script_calls;
 
 		steady_clock::time_point current_time = steady_clock::now();
+
+		if (GetInstance()->stopped == true)
+			return Request::sFailed;
 
 		if (script_blacklist.find(form) != script_blacklist.end())
 		{
@@ -263,7 +257,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLEncode", "SKUNet", URLEncode, registry));
 		registry->RegisterFunction(new NativeFunction1<StaticFunctionTag, BSFixedString, BSFixedString>							("URLDecode", "SKUNet", URLDecode, registry));
 
-		registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>						("GetNexusModInfo", "SKUNet", GetLLabModInfo, registry));
+		registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>						("GetNexusModInfo", "SKUNet", GetNexusModInfo, registry));
 		registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>						("GetLLabModInfo", "SKUNet", GetLLabModInfo, registry));
 
 		Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");

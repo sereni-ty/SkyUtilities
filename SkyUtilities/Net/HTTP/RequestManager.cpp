@@ -1,5 +1,7 @@
 #include "Net/HTTP/RequestManager.h"
 #include "Net/HTTP/RequestProtocolContext.h"
+#include "Net/HTTP/BasicRequestEventHandler.h"
+#include "Net/HTTP/ModInfoRequestEventHandler.h"
 
 #include "Net/NetInterface.h"
 
@@ -363,6 +365,8 @@ namespace SKU::Net::HTTP {
 				Plugin::Log(LOGL_VERBOSE, "RequestManager: Calling request (id: %d) handler.",
 					request->GetID());
 
+
+				ctx->response.push_back('\0');
 				request->GetHandler()->OnRequestFinished(request);
 			}
 			
@@ -442,7 +446,6 @@ namespace SKU::Net::HTTP {
 		}
 
 		Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) was answered with %d bytes.", (int)request_id, size*nmemb);
-
 		request->GetProtocolContext<RequestProtocolContext>()->response.append(data, size*nmemb);
 
 		return size*nmemb;
@@ -494,6 +497,7 @@ namespace SKU::Net::HTTP {
 
 				FAIL_BREAK_WRITE(serilization_interface, &(tmp = request->GetID()), 4);
 				FAIL_BREAK_WRITE(serilization_interface, &(tmp = request->GetTimeout()), 4);
+				FAIL_BREAK_WRITE(serilization_interface, &request->GetHandler()->TypeID, 4);
 
 				FAIL_BREAK_WRITE(serilization_interface, &(tmp = ctx->url.size()), 4);
 				FAIL_BREAK_WRITE(serilization_interface, ctx->url.c_str(), tmp);
@@ -562,6 +566,26 @@ namespace SKU::Net::HTTP {
 
 			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // timeout
 			request->SetTimeout(tmp);
+
+			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // handler
+
+			switch (tmp)
+			{
+				case HTTP::BasicRequestEventHandler::TypeID:
+				{
+					request->SetHandler(std::make_shared<HTTP::BasicRequestEventHandler>());
+				} break;
+
+				case HTTP::NexusModInfoRequestEventHandler::TypeID:
+				{
+					request->SetHandler(std::make_shared<HTTP::NexusModInfoRequestEventHandler>());
+				} break;
+
+				case HTTP::LLabModInfoRequestEventHandler::TypeID:
+				{
+					request->SetHandler(std::make_shared<HTTP::LLabModInfoRequestEventHandler>());
+				} break;
+			}
 
 			FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // url size
 
