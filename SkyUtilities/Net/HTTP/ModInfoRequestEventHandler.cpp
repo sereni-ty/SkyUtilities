@@ -14,10 +14,14 @@
 // TODO: (nexus) adult content barrier
 namespace SKU::Net::HTTP {
 
-	void NexusModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request)
+	void NexusModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request) // regular expressions partially working (adult only the exception), 28.05.2017
 	{
 		const std::regex
-			mod_name_exp(//<span class="header-name">The Book of UUNP Bodyslide - UNP - Sevenbase</span>
+			adult_only_exp(
+				"<[\t ]{0,}\\/[\t ]{0,}p><h2>Adult[\t ]{0,}\\-[\t ]{0,}only[\t ]{0,}content<[\t ]{0,}\\/[\t ]{0,}h2>"
+			),
+
+			mod_name_exp(
 				"<span[\t ]{0,}class=\"header\\-name\">(.*?)<\\/span>"
 			),
 
@@ -44,6 +48,7 @@ namespace SKU::Net::HTTP {
 			);
 
 		std::smatch
+			adult_only_match,
 			mod_name_match,
 			mod_version_match,
 			mod_dates_match,
@@ -51,54 +56,65 @@ namespace SKU::Net::HTTP {
 			mod_views_match;
 
 		RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+
 		std::string response = ctx->GetResponse();
+		std::string fail_value;
 		
+		Plugin::Log(LOGL_VERBOSE, "NexusModInfoRequestEventHandler: Handling request (id: %d).",
+			request->GetID());
+
 		PapyrusEvent::Args args = {
-			std::make_any<int>(request->GetID()),
-			std::make_any<bool>(request->GetState() != Request::sOK),
+			std::make_any<int>(request->GetID())			
 		};
 
-		Plugin::Log(LOGL_VERBOSE, "NexusModInfoRequestEventHandler: Handling request (id: %d). Data size: %d",
-			request->GetID(), response.size());
-
-		if (std::regex_search(response, mod_name_match, mod_name_exp)) // name
+		if (request->GetState() != Request::sOK)
 		{
+			fail_value = "_REQUEST_FAILED_";
+		}
+		else if (std::regex_search(response, adult_only_match, adult_only_exp))
+		{
+			fail_value = "ADULT-ONLY";
+		}
+		else
+		{
+			fail_value = "_PARSING_FAILED_";
+
+			if (std::regex_search(response, mod_name_match, mod_name_exp) == false) // name
+				goto fail;
+
+			if (std::regex_search(response, mod_version_match, mod_version_exp) == false) // version
+				goto fail;
+
+			if (std::regex_search(response, mod_dates_match, mod_dates_exp) == false) // mod last updated, mod added
+				goto fail;
+
+			if (std::regex_search(response, mod_downloads_match, mod_downloads_exp) == false) // mod downloads
+				goto fail;
+
+			if (std::regex_search(response, mod_views_match, mod_views_exp) == false) // mod views
+				goto fail;
+
+			fail_value.clear();
+
+			args.push_back(std::make_any<bool>(true));
 			args.push_back(std::make_any<std::string>(mod_name_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
-
-		if (std::regex_search(response, mod_version_match, mod_version_exp)) // version
-		{
 			args.push_back(std::make_any<std::string>(mod_version_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
-
-		if (std::regex_search(response, mod_dates_match, mod_dates_exp)) // mod last updated, mod added
-		{
 			args.push_back(std::make_any<std::string>(mod_dates_match[1].str()));
 			args.push_back(std::make_any<std::string>(mod_dates_match[2].str()));
-		}
-		else
-		{
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
-		}			
-
-		if (std::regex_search(response, mod_downloads_match, mod_downloads_exp)) // mod downloads
-		{
 			args.push_back(std::make_any<std::string>(mod_downloads_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
-
-		if (std::regex_search(response, mod_views_match, mod_views_exp)) // mod views
-		{
 			args.push_back(std::make_any<std::string>(mod_views_match[1].str()));
 		}
-		else
-			args.push_back(std::make_any<std::string>("---unable_to_parse---"));
+
+	fail:
+		if (fail_value.size())
+		{
+			args.push_back(std::make_any<bool>(false));
+
+			while (args.size() != 8)
+			{
+				args.push_back(std::make_any<std::string>(fail_value));
+			}
+		}
 
 		PapyrusEventHandler::GetInstance()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
 	}
@@ -150,58 +166,63 @@ namespace SKU::Net::HTTP {
 			mod_views_match;
 
 		RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+
 		std::string response = ctx->GetResponse();
+		std::string fail_value;
 
 		PapyrusEvent::Args args = {
 			std::make_any<int>(request->GetID()),
-			std::make_any<bool>(request->GetState() != Request::sOK),
 		};		
 
 		Plugin::Log(LOGL_VERBOSE, "LLabModInfoRequestEventHandler: Handling request (id: %d).",
 			request->GetID());
 		
-		if (std::regex_search(response, mod_name_match, mod_name_exp)) // name
+		if (request->GetState() != Request::sOK)
 		{
+			fail_value = "_REQUEST_FAILED_";
+		}
+		else
+		{
+			fail_value = "_PARSING_FAILED_";
+
+			if (std::regex_search(response, mod_name_match, mod_name_exp) == false) // name
+				goto fail;
+
+			if (std::regex_search(response, mod_version_match, mod_version_exp) == false) // version
+				goto fail;
+
+			if (std::regex_search(response, mod_last_updated_match, mod_last_updated_exp) == false) // mod last updated
+				goto fail;
+
+			if (std::regex_search(response, mod_added_match, mod_added_exp) == false) // mod added
+				goto fail;
+
+			if (std::regex_search(response, mod_downloads_match, mod_downloads_exp) == false) // mod downloads
+				goto fail;
+
+			if (std::regex_search(response, mod_views_match, mod_views_exp) == false) // mod views
+				goto fail;
+
+			args.push_back(std::make_any<bool>(true));
 			args.push_back(std::make_any<std::string>(mod_name_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>("")); 
-
-		if (std::regex_search(response, mod_version_match, mod_version_exp)) // version
-		{
 			args.push_back(std::make_any<std::string>(mod_version_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>(""));
-
-		if (std::regex_search(response, mod_last_updated_match, mod_last_updated_exp)) // mod last updated
-		{
 			args.push_back(std::make_any<std::string>(mod_last_updated_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>(""));
-
-		if (std::regex_search(response, mod_added_match, mod_added_exp)) // mod added
-		{
 			args.push_back(std::make_any<std::string>(mod_added_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>(""));
-
-		if (std::regex_search(response, mod_downloads_match, mod_downloads_exp)) // mod downloads
-		{
 			args.push_back(std::make_any<std::string>(mod_downloads_match[1].str()));
-		}
-		else
-			args.push_back(std::make_any<std::string>(""));
-
-		if (std::regex_search(response, mod_views_match, mod_views_exp)) // mod views
-		{
 			args.push_back(std::make_any<std::string>(mod_views_match[1].str()));
 		}
-		else
-			args.push_back(std::make_any<std::string>(""));
-		
+
+	fail:
+		if (fail_value.size())
+		{
+			args.push_back(std::make_any<bool>(false));
+
+			while (args.size() != 8)
+			{
+				args.push_back(std::make_any<std::string>(fail_value));
+			}
+		}
+
 		PapyrusEventHandler::GetInstance()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
 	}
 
