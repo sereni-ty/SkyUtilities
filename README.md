@@ -14,7 +14,7 @@ For more information see **Future**.
 ### Future (or.. *I need features!*)
 
 Planned:
-+ Writing examples
++ More [Examples][repo_examples_link]
 
 Thinking about:
 + See [Future][repo_future_link]
@@ -37,3 +37,4 @@ A compiler with partial C++17 feature implementation (std::any, nested namespace
 [site_curl]: https://curl.haxx.se/
 [site_boost]: http://www.boost.org
 [repo_future_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/Future.md#thoughts
+[repo_examples_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/Examples.md
