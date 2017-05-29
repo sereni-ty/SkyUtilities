@@ -12,8 +12,6 @@
 #include <cctype>
 #include <fstream>
 
-// TODO: if requests have failed..
-// TODO: (nexus) adult content barrier
 namespace SKU::Net::HTTP {
   inline void reformat_response(std::string &response)
   {
