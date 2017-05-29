@@ -22,4 +22,7 @@ Result:
 
 ![Net: Mod Retrieval Console Output][net-mod-ret-con-out]
 
+Regarding the _ADULT-ONLY_ output, see [SKUNet Papyrus Source][repo_net_psc_link]
+
 [net-mod-ret-con-out]: http://i.imgur.com/quLfmcO.png
+[repo_net_psc_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/SkyUtilities/Papyrus%20Exports/SKUNet.psc#L23
