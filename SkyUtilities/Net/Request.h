@@ -10,62 +10,60 @@
 #include <mutex>
 
 namespace SKU::Net {
+  class Request : public Lockable
+  {
+    public:
+    using Ptr = std::shared_ptr<Request>;
 
-	class Request : public Lockable
-	{
-		public:
-			using Ptr = std::shared_ptr<Request>;
+    public:
+    enum State
+    {
+      sBlacklisted = -2,		// Blocked from adding requests indefinitely
 
-		public:
-			enum State
-			{
-				sBlacklisted = -2,		// Blocked from adding requests indefinitely
-				
-				sFailed = 0,
-				sOK = 1,
+      sFailed = 0,
+      sOK = 1,
 
-				sWaitingForSetup,
-				sReady,
-				sPending,
-			};
+      sWaitingForSetup,
+      sReady,
+      sPending,
+    };
 
-		public:
-			Request(int pre_set_id = -1) noexcept;
-			~Request();
+    public:
+    Request(int pre_set_id = -1) noexcept;
+    ~Request();
 
-		public:
-			template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
-			static Ptr Create(int pre_set_id = -1);
+    public:
+    template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
+    static Ptr Create(int pre_set_id = -1);
 
-		public:
-			void Stop();
+    public:
+    void Stop();
 
-		public:
-			int GetID() noexcept;
-			State GetState() noexcept;
-			unsigned GetTimeout() noexcept; // Timeout in ms
-			RequestEventHandler::Ptr GetHandler();
+    public:
+    int GetID() noexcept;
+    State GetState() noexcept;
+    unsigned GetTimeout() noexcept; // Timeout in ms
+    RequestEventHandler::Ptr GetHandler();
 
-			template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
-			typename ProtocolContextType::Ptr GetProtocolContext();
+    template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
+    typename ProtocolContextType::Ptr GetProtocolContext();
 
-		public:
-			void SetID(int id) noexcept;
-			void SetState(State state) noexcept;
-			void SetTimeout(unsigned ms) noexcept;
-			void SetHandler(RequestEventHandler::Ptr handler);
+    public:
+    void SetID(int id) noexcept;
+    void SetState(State state) noexcept;
+    void SetTimeout(unsigned ms) noexcept;
+    void SetHandler(RequestEventHandler::Ptr handler);
 
-		private:
-			int id;
-			State state;
-			IRequestProtocolContext::Ptr proto_ctx;
-			unsigned timeout;
+    private:
+    int id;
+    State state;
+    IRequestProtocolContext::Ptr proto_ctx;
+    unsigned timeout;
 
-			RequestEventHandler::Ptr handler;
+    RequestEventHandler::Ptr handler;
 
-			std::mutex mtx;
-	};
+    std::mutex mtx;
+  };
 
 #	include "Request.inl"
-
 }

@@ -5,27 +5,27 @@
 #include <memory>
 
 namespace SKU::Net {
-	
-	class RequestManagerBase
-	{
-		public:
-			bool AddRequest(Request::Ptr request) noexcept;
-			virtual void RemoveRequest(Request::Ptr request);
+  class RequestManagerBase
+  {
+    public:
+    bool AddRequest(Request::Ptr request) noexcept;
+    virtual void RemoveRequest(Request::Ptr request);
 
-			Request::Ptr GetRequestByID(unsigned request_id) noexcept;
+    Request::Ptr GetRequestByID(unsigned request_id) noexcept;
 
-		protected:
-			virtual void OnRequestAdded(Request::Ptr request) {}
-			virtual void OnRequestRemoval(Request::Ptr request) {}
+    protected:
+    virtual void OnRequestAdded(Request::Ptr request)
+    {}
+    virtual void OnRequestRemoval(Request::Ptr request)
+    {}
 
-		public:
-			virtual void Initialize() = 0;
+    public:
+    virtual void Initialize() = 0;
 
-			virtual void Stop() = 0;
-			virtual void Start() = 0;
+    virtual void Stop() = 0;
+    virtual void Start() = 0;
 
-		protected:
-			RequestPool pool;
-	};
-
+    protected:
+    RequestPool pool;
+  };
 }

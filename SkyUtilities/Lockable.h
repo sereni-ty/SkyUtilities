@@ -3,22 +3,20 @@
 #include <mutex>
 
 namespace SKU {
-	
-	class Lockable // For the time being sufficient..
-	{
-		public:
-			void Lock()
-			{ 
-				mtx.lock(); 
-			}
+  class Lockable // For the time being sufficient..
+  {
+    public:
+    void Lock()
+    {
+      mtx.lock();
+    }
 
-			void Unlock() 
-			{
-				mtx.unlock(); 
-			}
+    void Unlock()
+    {
+      mtx.unlock();
+    }
 
-		protected:
-			std::mutex mtx;
-	};
-
+    protected:
+    std::mutex mtx;
+  };
 }

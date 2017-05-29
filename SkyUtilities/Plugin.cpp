@@ -19,257 +19,255 @@
 // TODO: might need a configuration file (net: requests per seconds, max response size)
 
 namespace SKU {
+  Plugin::Plugin()
+    : is_game_ready(false), is_plugin_active(true)
+  {
+    Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
+  }
 
-	Plugin::Plugin()
-		: is_game_ready(false), is_plugin_active(true)
-	{
-		Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
-	}
+  Plugin::~Plugin()
+  {
+    Stop();
 
-	Plugin::~Plugin()
-	{
-		Stop();
+    Log(LOGL_INFO, "Plugin stopped.");
+  }
 
-		Log(LOGL_INFO, "Plugin stopped.");
-	}
+  bool Plugin::Initialize()
+  {
+    Log(LOGL_INFO, "Initializing.");
 
-	bool Plugin::Initialize()
-	{
-		Log(LOGL_INFO, "Initializing.");
+    //
+    // Event handler
+    event_handler_set.emplace(PapyrusEventHandler::GetInstance());
+    event_handler_set.emplace(Net::Interface::GetInstance());
+    event_handler_set.emplace(Net::HTTP::RequestManager::GetInstance());
 
-		//
-		// Event handler
-		event_handler_set.emplace(PapyrusEventHandler::GetInstance());
-		event_handler_set.emplace(Net::Interface::GetInstance());
-		event_handler_set.emplace(Net::HTTP::RequestManager::GetInstance());
-				
-		return true;
-	}
+    return true;
+  }
 
-	void Plugin::Stop()
-	{
-		if (is_plugin_active == false)
-			return;
+  void Plugin::Stop()
+  {
+    if (is_plugin_active == false)
+      return;
 
-		is_plugin_active = false;
+    is_plugin_active = false;
 
-		event_handler_set.clear();
+    event_handler_set.clear();
 
-		Log(LOGL_VERBOSE, "Stopping Interfaces: ");
-		Log(LOGL_VERBOSE, " - Net");
-		Net::Interface::GetInstance()->Stop();		
-	}
+    Log(LOGL_VERBOSE, "Stopping Interfaces: ");
+    Log(LOGL_VERBOSE, " - Net");
+    Net::Interface::GetInstance()->Stop();
+  }
 
-	bool Plugin::OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info)
-	{
-		if (skse == nullptr || info == nullptr)
-			return false;
-		
-		if (skse->runtimeVersion < RUNTIME_VERSION_1_9_32_0)
-		{
-			Log(LOGL_INFO, "SKSE version is below 1.9.32.0. Get at least that version or a newer one. Stopping plugin.");
-			return false;
-		}
+  bool Plugin::OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info)
+  {
+    if (skse == nullptr || info == nullptr)
+      return false;
 
-		info->name = PLUGIN_NAME;
-		info->version = PLUGIN_VERSION;
-		info->infoVersion = PluginInfo::kInfoVersion;
+    if (skse->runtimeVersion < RUNTIME_VERSION_1_9_32_0)
+    {
+      Log(LOGL_INFO, "SKSE version is below 1.9.32.0. Get at least that version or a newer one. Stopping plugin.");
+      return false;
+    }
 
-		return true;
-	}
+    info->name = PLUGIN_NAME;
+    info->version = PLUGIN_VERSION;
+    info->infoVersion = PluginInfo::kInfoVersion;
 
-	bool Plugin::OnSKSELoad(const SKSEInterface *skse)
-	{
-		if (skse == nullptr)
-			return false;
+    return true;
+  }
 
-		SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
-		SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
-		SKSESerializationInterface *skse_serialization = reinterpret_cast<SKSESerializationInterface*>(skse->QueryInterface(kInterface_Serialization));
+  bool Plugin::OnSKSELoad(const SKSEInterface *skse)
+  {
+    if (skse == nullptr)
+      return false;
 
-		if (skse_papyrus == nullptr || skse_messaging == nullptr || skse_serialization == nullptr)
-		{
-			Log(LOGL_INFO, "SKSE failed to return valid interfaces. Stopping plugin.");
-			Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s\n-\tSerialization: %s", 
-				(skse_papyrus ? "valid" : "invalid"),
-				(skse_messaging ? "valid" : "invalid"),
-				(skse_serialization ? "valid" : "invalid"));
+    SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
+    SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
+    SKSESerializationInterface *skse_serialization = reinterpret_cast<SKSESerializationInterface*>(skse->QueryInterface(kInterface_Serialization));
 
-			return false;
-		}
+    if (skse_papyrus == nullptr || skse_messaging == nullptr || skse_serialization == nullptr)
+    {
+      Log(LOGL_INFO, "SKSE failed to return valid interfaces. Stopping plugin.");
+      Log(LOGL_DETAILED, "Interfaces:\n-\tPapyrus Interface: %s\n-\tMessaging: %s\n-\tSerialization: %s",
+        (skse_papyrus ? "valid" : "invalid"),
+        (skse_messaging ? "valid" : "invalid"),
+        (skse_serialization ? "valid" : "invalid"));
 
-		skse_serialization->SetUniqueID(skse->GetPluginHandle(), PLUGIN_SERIALIZATION_UID);
-		skse_serialization->SetSaveCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
-		skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSELoadGameProxy);
+      return false;
+    }
 
-		return skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
-			&& skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
-	}
+    skse_serialization->SetUniqueID(skse->GetPluginHandle(), PLUGIN_SERIALIZATION_UID);
+    skse_serialization->SetSaveCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
+    skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSELoadGameProxy);
 
-	bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry *registry)
-	{
-		if (registry == nullptr)
-		{
-			Plugin::Log(LOGL_VERBOSE, "(SKSE Register Functions Event) Plugin: SKSE passed a invalid argument. Ignoring.");
+    return skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
+      && skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
+  }
 
-			return false;
-		}
+  bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry *registry)
+  {
+    if (registry == nullptr)
+    {
+      Plugin::Log(LOGL_VERBOSE, "(SKSE Register Functions Event) Plugin: SKSE passed a invalid argument. Ignoring.");
 
-		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-			if (event_handler) event_handler->OnSKSERegisterPapyrusFunctions(registry);
+      return false;
+    }
 
-		return true;
-	}
+    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+      if (event_handler) event_handler->OnSKSERegisterPapyrusFunctions(registry);
 
-	void Plugin::OnSKSEMessageProxy(SKSEMessagingInterface::Message *message)
-	{
-		if (message == nullptr)
-		{
-			Log(LOGL_VERBOSE, "(SKSE Message Event) Plugin: SKSE passed a invalid argument. Ignoring.");
+    return true;
+  }
 
-			return;
-		}
+  void Plugin::OnSKSEMessageProxy(SKSEMessagingInterface::Message *message)
+  {
+    if (message == nullptr)
+    {
+      Log(LOGL_VERBOSE, "(SKSE Message Event) Plugin: SKSE passed a invalid argument. Ignoring.");
 
-		switch (message->type)
-		{
-			case SKSEMessagingInterface::kMessage_PostLoadGame:
-			case SKSEMessagingInterface::kMessage_NewGame:
-			{
-				Log(LOGL_VERBOSE, "Plugin: Game is ready");
-				GetInstance()->is_game_ready = true;
-			} break;
+      return;
+    }
 
-			case SKSEMessagingInterface::kMessage_PreLoadGame:
-			{
-				Log(LOGL_VERBOSE, "Plugin: Game is not ready");
-				GetInstance()->is_game_ready = false;
-				
-			} break;
-		}
+    switch (message->type)
+    {
+      case SKSEMessagingInterface::kMessage_PostLoadGame:
+      case SKSEMessagingInterface::kMessage_NewGame:
+      {
+        Log(LOGL_VERBOSE, "Plugin: Game is ready");
+        GetInstance()->is_game_ready = true;
+      } break;
 
-		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-			if(event_handler) event_handler->OnSKSEMessage(message);
-	}
+      case SKSEMessagingInterface::kMessage_PreLoadGame:
+      {
+        Log(LOGL_VERBOSE, "Plugin: Game is not ready");
+        GetInstance()->is_game_ready = false;
+      } break;
+    }
 
-	void Plugin::OnSKSESaveGameProxy(SKSESerializationInterface *serialization_interface)
-	{
-		Log(LOGL_INFO, "Plugin: Saving.");
+    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+      if (event_handler) event_handler->OnSKSEMessage(message);
+  }
 
-		if (serialization_interface == nullptr)
-		{
-			Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to save game.");
-			return;
-		}
+  void Plugin::OnSKSESaveGameProxy(SKSESerializationInterface *serialization_interface)
+  {
+    Log(LOGL_INFO, "Plugin: Saving.");
 
-		for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-		{
-			if (event_handler != nullptr)
-			{
-				event_handler->OnSKSESaveGame(serialization_interface);
-			}
-		}			
+    if (serialization_interface == nullptr)
+    {
+      Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to save game.");
+      return;
+    }
 
-		Log(LOGL_INFO, "Plugin: Saved.");
-	}
+    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+    {
+      if (event_handler != nullptr)
+      {
+        event_handler->OnSKSESaveGame(serialization_interface);
+      }
+    }
 
-	void Plugin::OnSKSELoadGameProxy(SKSESerializationInterface *serialization_interface)
-	{
-		Log(LOGL_INFO, "Plugin: Loading.");
+    Log(LOGL_INFO, "Plugin: Saved.");
+  }
 
-		/* TODO: argument for currently open record to onskseloadgame */
+  void Plugin::OnSKSELoadGameProxy(SKSESerializationInterface *serialization_interface)
+  {
+    Log(LOGL_INFO, "Plugin: Loading.");
 
-		if (serialization_interface == nullptr)
-		{
-			Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to load game.");
-			return;
-		}
+    /* TODO: argument for currently open record to onskseloadgame */
 
-		UInt32 type, version, length;
+    if (serialization_interface == nullptr)
+    {
+      Log(LOGL_WARNING, "Plugin: Invalid serialization interface pointer. Unable to load game.");
+      return;
+    }
 
-		while (serialization_interface->GetNextRecordInfo(&type, &version, &length) == true)
-		{
-			for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-			{
-				if (event_handler != nullptr)
-				{
-					event_handler->OnSKSELoadGame(serialization_interface, type, version, length);
-				}
-			}
-		}
+    UInt32 type, version, length;
 
-		Log(LOGL_INFO, "Plugin: Loaded.");
-	}
+    while (serialization_interface->GetNextRecordInfo(&type, &version, &length) == true)
+    {
+      for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+      {
+        if (event_handler != nullptr)
+        {
+          event_handler->OnSKSELoadGame(serialization_interface, type, version, length);
+        }
+      }
+    }
 
-	bool Plugin::IsGameReady()
-	{
-		return is_game_ready && is_plugin_active;
-	}
+    Log(LOGL_INFO, "Plugin: Loaded.");
+  }
 
-	inline 
-	void Plugin::Log(unsigned int level, const char *fmt, ...)
-	{
-		static std::mutex mtx;
-		
-		va_list args;
-		std::string cfmt;
-		
-		/*if (level > DEBUG)
-			return;*/
+  bool Plugin::IsGameReady()
+  {
+    return is_game_ready && is_plugin_active;
+  }
 
-		va_start(args, fmt);
+  inline
+    void Plugin::Log(unsigned int level, const char *fmt, ...)
+  {
+    static std::mutex mtx;
 
-		switch(level)
-		{
-			case LOGL_CRITICAL: cfmt.assign("[CRITICAL] "); break;
-			case LOGL_WARNING:	cfmt.assign("[ WARNING] "); break;
-			case LOGL_INFO:		cfmt.assign("[    INFO] "); break;
-			case LOGL_DETAILED: cfmt.assign("[      ->| "); break;
-			case LOGL_VERBOSE:	cfmt.assign("[ VERBOSE] "); break;
-		}
-		
-		cfmt.append(fmt);
+    va_list args;
+    std::string cfmt;
 
-		mtx.lock();
-		gLog.Log(IDebugLog::kLevel_Message, cfmt.c_str(), args);
-		mtx.unlock();
+    /*if (level > DEBUG)
+      return;*/
 
-		va_end(args);
-	}
+    va_start(args, fmt);
+
+    switch (level)
+    {
+      case LOGL_CRITICAL: cfmt.assign("[CRITICAL] "); break;
+      case LOGL_WARNING:	cfmt.assign("[ WARNING] "); break;
+      case LOGL_INFO:		cfmt.assign("[    INFO] "); break;
+      case LOGL_DETAILED: cfmt.assign("[      ->| "); break;
+      case LOGL_VERBOSE:	cfmt.assign("[ VERBOSE] "); break;
+    }
+
+    cfmt.append(fmt);
+
+    mtx.lock();
+    gLog.Log(IDebugLog::kLevel_Message, cfmt.c_str(), args);
+    mtx.unlock();
+
+    va_end(args);
+  }
 }
 
 extern "C"
 {
-	bool __declspec(dllexport) SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
-	{
-		return SKU::Plugin::GetInstance()->OnSKSEQuery(skse, info);
-	}
+  bool __declspec(dllexport) SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
+  {
+    return SKU::Plugin::GetInstance()->OnSKSEQuery(skse, info);
+  }
 
-	bool __declspec(dllexport) SKSEPlugin_Load(const SKSEInterface * skse)
-	{
-		return SKU::Plugin::GetInstance()->OnSKSELoad(skse);
-	}
+  bool __declspec(dllexport) SKSEPlugin_Load(const SKSEInterface * skse)
+  {
+    return SKU::Plugin::GetInstance()->OnSKSELoad(skse);
+  }
 }
 
 extern "C"
 {
-	BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-	{
-		switch (fdwReason)
-		{
-			case DLL_PROCESS_ATTACH:
-			{
-				gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
+  BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+  {
+    switch (fdwReason)
+    {
+      case DLL_PROCESS_ATTACH:
+      {
+        gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
 
-				if (SKU::Plugin::GetInstance()->Initialize() == false)
-					return FALSE;
-			} break;
+        if (SKU::Plugin::GetInstance()->Initialize() == false)
+          return FALSE;
+      } break;
 
-			case DLL_PROCESS_DETACH:
-			{
-				SKU::Plugin::GetInstance()->Stop();
-			} break;
-		}
+      case DLL_PROCESS_DETACH:
+      {
+        SKU::Plugin::GetInstance()->Stop();
+      } break;
+    }
 
-		return TRUE;
-	}
+    return TRUE;
+  }
 }

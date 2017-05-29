@@ -4,35 +4,49 @@
 #include <string>
 
 namespace SKU::Net {
-	
-	class Request;
+  class Request;
 
-	class IRequestProtocolContext
-	{
-		public:
-			using Ptr = std::shared_ptr<IRequestProtocolContext>;
+  class IRequestProtocolContext
+  {
+    public:
+    using Ptr = std::shared_ptr<IRequestProtocolContext>;
 
-		public:	
-			virtual ~IRequestProtocolContext() { Cleanup(); if(owner) owner.reset(); }
+    public:
+    virtual ~IRequestProtocolContext()
+    {
+      Cleanup(); if (owner) owner.reset();
+    }
 
-		protected:
-			void SetOwner(std::shared_ptr<Request> owner) noexcept { this->owner = owner; }
-			std::shared_ptr<Request> GetOwner() const noexcept { return this->owner; }
+    protected:
+    void SetOwner(std::shared_ptr<Request> owner) noexcept
+    {
+      this->owner = owner;
+    }
+    std::shared_ptr<Request> GetOwner() const noexcept
+    {
+      return this->owner;
+    }
 
-		public:
-			virtual void Initialize() {};
-			virtual void Cleanup() { response.clear();  };
+    public:
+    virtual void Initialize()
+    {};
+    virtual void Cleanup()
+    {
+      response.clear();
+    };
 
-		public:
-			virtual std::string GetResponse() noexcept { return response; }
+    public:
+    virtual std::string GetResponse() noexcept
+    {
+      return response;
+    }
 
-		protected:
-			std::string response;
+    protected:
+    std::string response;
 
-		private:
-			std::shared_ptr<Request> owner;
+    private:
+    std::shared_ptr<Request> owner;
 
-		friend class Request;
-	};
-
+    friend class Request;
+  };
 }

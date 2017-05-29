@@ -13,11 +13,11 @@ struct PluginInfo;
 
 enum
 {
-	LOGL_CRITICAL = -2,
-	LOGL_WARNING,
-	LOGL_INFO,
-	LOGL_DETAILED,
-	LOGL_VERBOSE
+  LOGL_CRITICAL = -2,
+  LOGL_WARNING,
+  LOGL_INFO,
+  LOGL_DETAILED,
+  LOGL_VERBOSE
 };
 
 #define DEBUG LOGL_VERBOSE
@@ -39,46 +39,44 @@ enum
 #define PLUGIN_SERIALIZATION_VERSION 1
 
 namespace SKU {
+  class Plugin : public Singleton<Plugin>
+  {
+    IS_SINGLETON_CLASS(Plugin)
 
-	class Plugin : public Singleton<Plugin>
-	{
-		IS_SINGLETON_CLASS(Plugin)
+    public:
+    bool Initialize();
+    void Stop();
 
-		public:
-			bool Initialize();
-			void Stop();
+    public:
+    bool OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info);
+    bool OnSKSELoad(const SKSEInterface *skse);
 
-		public:
-			bool OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info);
-			bool OnSKSELoad(const SKSEInterface *skse);
+    static bool OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry*);
+    static void OnSKSEMessageProxy(SKSEMessagingInterface::Message*);
 
-			static bool OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry*);
-			static void OnSKSEMessageProxy(SKSEMessagingInterface::Message*);
+    static void OnSKSESaveGameProxy(SKSESerializationInterface*);
+    static void OnSKSELoadGameProxy(SKSESerializationInterface*);
 
-			static void OnSKSESaveGameProxy(SKSESerializationInterface*);
-			static void OnSKSELoadGameProxy(SKSESerializationInterface*);
+    public:
+    bool IsGameReady();
+    //bool IsPluginActive();
 
-		public:
-			bool IsGameReady();
-			//bool IsPluginActive();
-			
-		public:
-			static void Log(unsigned int level, const char *fmt, ...);
+    public:
+    static void Log(unsigned int level, const char *fmt, ...);
 
-		private:
-			//static std::unordered_map<std::string, std::string> Configuration();
+    private:
+    //static std::unordered_map<std::string, std::string> Configuration();
 
-		private:
-			std::set<IEventHandler*> event_handler_set;
+    private:
+    std::set<IEventHandler*> event_handler_set;
 
-			bool is_plugin_active;
-			bool is_game_ready;
-	};
-
+    bool is_plugin_active;
+    bool is_game_ready;
+  };
 }
 
 extern "C"
 {
-	bool __declspec(dllexport) SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info);
-	bool __declspec(dllexport) SKSEPlugin_Load(const SKSEInterface * skse);
+  bool __declspec(dllexport) SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info);
+  bool __declspec(dllexport) SKSEPlugin_Load(const SKSEInterface * skse);
 }
