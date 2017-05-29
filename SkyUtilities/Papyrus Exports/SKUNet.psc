@@ -15,6 +15,13 @@ scriptname SKUNet hidden
 ; > event OnModInfoRetrieval(int request_id, bool request_failed, string mod_name, string mod_version, string mod_last_updated, string mod_added, string mod_downloads, string mod_views)
 ; > endEvent
 ;
+; if request_failed is set to true:
+;	mod_ parameter contains reason, which will be one of the following values:
+;
+;	_REQUEST_FAILED_: Request couldn't be processed properly. See the log for more details.
+;	_PARSING_FAILED_: Source code of the website has changed and therefore the parsing process failed. Contact me if that happens for an update.
+;	_ADULT-ONLY_: Nexus only. Happens if the mod is marked as adult only. There is no way around that barrier without accound details which I won't request of you. 
+;
 
 ; =========================================================
 ; FUNCTIONS (STATIC)
@@ -61,10 +68,6 @@ string function URLEncode(string raw_str) global native
 ;
 ;
 string function URLDecode(string encoded_str) global native
-
-; ======================
-;  NOT IMPLEMENTED YET:
-; ======================
 
 ;
 ; Starts request to retrieve mod information
