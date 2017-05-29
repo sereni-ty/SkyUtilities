@@ -16,7 +16,7 @@ scriptname SKUNet hidden
 ; > endEvent
 ;
 ; if request_failed is set to true:
-;	mod_ parameter contains reason, which will be one of the following values:
+;	Any 'mod_..' parameter contains the reason of failure, which will be one of the following values:
 ;
 ;	_REQUEST_FAILED_: Request couldn't be processed properly. See the log for more details.
 ;	_PARSING_FAILED_: Source code of the website has changed and therefore the parsing process failed. Contact me if that happens for an update.
