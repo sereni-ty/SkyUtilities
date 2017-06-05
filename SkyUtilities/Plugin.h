@@ -3,6 +3,9 @@
 #include "Singleton.h"
 #include "Events.h"
 
+#include "Net/NetInterface.h"
+#include "PapyrusEventManager.h"
+
 #include <set>
 
 #define WIN32_LEAN_AND_MEAN
@@ -44,7 +47,6 @@ namespace SKU {
     IS_SINGLETON_CLASS(Plugin)
 
     public:
-    bool Initialize();
     void Stop();
 
     public:
@@ -58,8 +60,17 @@ namespace SKU {
     static void OnSKSELoadGameProxy(SKSESerializationInterface*);
 
     public:
-    bool IsGameReady();
-    //bool IsPluginActive();
+    void OnNewGame();
+    void OnSaveGame();
+    void OnPreLoadGame();
+    void OnPostLoadGame();
+
+    public:
+    bool IsActive();
+
+    public:
+    Net::Interface::Ptr &GetNetInterface();
+    PapyrusEventManager::Ptr &GetPapyrusEventManager();
 
     public:
     static void Log(unsigned int level, const char *fmt, ...);
@@ -68,9 +79,10 @@ namespace SKU {
     //static std::unordered_map<std::string, std::string> Configuration();
 
     private:
-    std::set<IEventHandler*> event_handler_set;
+    Net::Interface::Ptr net;
+    PapyrusEventManager::Ptr papyrus_event_manager;
 
-    bool is_plugin_active;
+    bool is_plugin_ready;
     bool is_game_ready;
   };
 }

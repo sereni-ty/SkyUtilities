@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Singleton.h"
-#include "Events.h"
+#include "Serializeable.h"
 
 #include "Net/RequestManagerBase.h"
 
 #include <thread>
 #include <future>
+#include <memory>
+
 #include <curl/curl.h>
 
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE MACRO_SWAP32('RMSU')
@@ -14,19 +15,27 @@
 
 #define RESPONSE_MAX_SIZE 1024 * 256 // TODO: Configuration
 
-namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency
-  class RequestManager : public Singleton<RequestManager>, public SKU::Net::RequestManagerBase, public IEventHandler
+namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
+  class RequestManager : public SKU::Net::RequestManagerBase, public ISerializeable
   {
-    IS_SINGLETON_CLASS(RequestManager)
+    public:
+    using Ptr = std::unique_ptr<RequestManager>;
+
+    public:
+    RequestManager();
+    ~RequestManager();
 
     private:
     Request::Ptr GetRequestByHandle(CURL *curl_handle);
 
+    // RequestManagerBase
+    //
     public:
-    void Initialize();
+    virtual void Initialize() override;
+    virtual void Cleanup() override;
 
-    void Stop();
-    void Start();
+    virtual void Stop() override;
+    virtual void Start() override;
 
     public:
     static void Process();
@@ -36,6 +45,8 @@ namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency
     bool PerformRequests();
     bool CheckPendingRequests();
 
+    // RequestManagerBase
+    //
     public:
     virtual void OnRequestAdded(Request::Ptr request) override;
     virtual void OnRequestRemoval(Request::Ptr request) override;
@@ -43,9 +54,12 @@ namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency
     public:
     static size_t OnRequestResponse(char* data, size_t size, size_t nmemb, void *request_id);
 
+    // ISerializeable
+    //
     public:
-    void OnSKSESaveGame(SKSESerializationInterface *serilization_interface);
-    void OnSKSELoadGame(SKSESerializationInterface *serilization_interface, SInt32 type, SInt32 version, SInt32 length);
+    virtual void Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities) final;
+    virtual void Deserialize(ISerializeable::SerializationEntity &serialized) final;
+    virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
 
     private:
     bool should_run;

@@ -1,5 +1,5 @@
 #include "Plugin.h"
-#include "PapyrusEventHandler.h"
+#include "PapyrusEventManager.h"
 
 #include "Net/NetInterface.h"
 #include "Net/RequestEventHandler.h"
@@ -19,36 +19,40 @@
 
 namespace SKU::Net { // TODO: Consider writing class with control management (Start, Stop, ..), e.g. InterfaceBase (Start, Stop, Initialize)
   Interface::Interface()
-    : stopped(false)
-  {
-    Plugin::Log(LOGL_INFO, "Net: Initializing.");
-    Plugin::Log(LOGL_DETAILED, "Net: Enabling events");
-
-    PapyrusEventHandler::GetInstance()->Register(GetEventString(evHTTPRequestFinished));
-    PapyrusEventHandler::GetInstance()->Register(GetEventString(evModInfoRetrieval));
-  }
+  {}
 
   Interface::~Interface()
+  {}
+
+  void Interface::Start()
   {
-    Stop();
+    Plugin::Log(LOGL_INFO, "Net: Initializing.");
+
+    Plugin::GetInstance()->GetPapyrusEventManager()->Register(GetEventString(evHTTPRequestFinished));
+    Plugin::GetInstance()->GetPapyrusEventManager()->Register(GetEventString(evModInfoRetrieval));
+
+    http_requestmanager = std::make_unique<HTTP::RequestManager>();
   }
 
   void Interface::Stop()
   {
-    if (stopped == true)
-      return;
+    Plugin::Log(LOGL_VERBOSE, "Net: Stopping.");
 
     // events
-    PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evModInfoRetrieval));
-    PapyrusEventHandler::GetInstance()->Unregister(GetEventString(evHTTPRequestFinished));
+    Plugin::Log(LOGL_VERBOSE, "Net: Removing Events.");
+    Plugin::GetInstance()->GetPapyrusEventManager()->Unregister(GetEventString(evModInfoRetrieval));
+    Plugin::GetInstance()->GetPapyrusEventManager()->Unregister(GetEventString(evHTTPRequestFinished));
 
-    // request managers
-    HTTP::RequestManager::GetInstance()->Stop();
+    // request manager
+    this->http_requestmanager.reset();
 
     // internal state
-    stopped = true;
-
     Plugin::Log(LOGL_VERBOSE, "Net: Stopped.");
+  }
+
+  HTTP::RequestManager::Ptr &Interface::GetHTTPRequestManager()
+  {
+    return http_requestmanager;
   }
 
   long Interface::HTTPGETRequest(StaticFunctionTag*, TESForm *form, BSFixedString url, long timeout)
@@ -72,7 +76,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
   }
 
   long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
-  {
+  {// TODO: check if scripts are paused, too..
     using namespace std::chrono;
 
     struct ScriptCallsTimeInformation
@@ -87,8 +91,10 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
     steady_clock::time_point current_time = steady_clock::now();
 
-    if (GetInstance()->stopped == true)
+    if (Plugin::GetInstance()->IsActive() == false)
+    {
       return Request::sFailed;
+    }
 
     if (script_blacklist.find(form) != script_blacklist.end())
     {
@@ -135,7 +141,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
       script_calls.emplace(form, std::move(info));
     }
 
-    if (Plugin::GetInstance()->IsGameReady() == false)	// Note: Just a precaution. Shouldn't happen: If the script was able to call a function
+    if (Plugin::GetInstance()->IsActive() == false)	// Note: Just a precaution. Shouldn't happen: If the script was able to call a function
     {													// (well, this one in this case) SKSE should've sent a message notification and thus
       return Request::sFailed;						// the method should always return true.
     }
@@ -148,7 +154,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
       request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
       if (HTTP::LLabModInfoRequestEventHandler::TypeID < request_handler_type_id // TODO: Fix this whole TypeID mess.
-        || true == HTTP::RequestManager::GetInstance()->AddRequest(request))
+        || true == Plugin::GetInstance()->GetNetInterface()->http_requestmanager->AddRequest(request))
       {
         if (form != nullptr)
         {
@@ -157,19 +163,19 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
             case HTTP::BasicRequestEventHandler::TypeID:
             {
               request->SetHandler(std::make_shared<HTTP::BasicRequestEventHandler>());
-              PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
+              Plugin::GetInstance()->GetPapyrusEventManager()->AddRecipient(GetEventString(evHTTPRequestFinished), form);
             } break;
 
             case HTTP::NexusModInfoRequestEventHandler::TypeID:
             {
               request->SetHandler(std::make_shared<HTTP::NexusModInfoRequestEventHandler>());
-              PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evModInfoRetrieval), form);
+              Plugin::GetInstance()->GetPapyrusEventManager()->AddRecipient(GetEventString(evModInfoRetrieval), form);
             } break;
 
             case HTTP::LLabModInfoRequestEventHandler::TypeID:
             {
               request->SetHandler(std::make_shared<HTTP::LLabModInfoRequestEventHandler>());
-              PapyrusEventHandler::GetInstance()->AddRecipient(GetEventString(evModInfoRetrieval), form);
+              Plugin::GetInstance()->GetPapyrusEventManager()->AddRecipient(GetEventString(evModInfoRetrieval), form);
             } break;
 
             default: throw std::exception();
@@ -265,6 +271,21 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
     registry->RegisterFunction(new NativeFunction2<StaticFunctionTag, long, TESForm*, BSFixedString>("GetLLabModInfo", "SKUNet", GetLLabModInfo, registry));
 
     Plugin::Log(LOGL_DETAILED, "Net: Registered Papyrus functions.");
+  }
+
+  void Interface::Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities)
+  {
+    http_requestmanager->Serialize(serialized_entities);
+  }
+
+  void Interface::Deserialize(ISerializeable::SerializationEntity &serialized)
+  {
+    http_requestmanager->Deserialize(serialized);
+  }
+
+  bool Interface::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
+  {
+    return http_requestmanager->IsRequestedSerialization(serialized);
   }
 
   inline std::string Interface::GetEventString(PapyrusEvent event) noexcept

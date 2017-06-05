@@ -9,11 +9,9 @@
 #include <any>
 
 namespace SKU {
-  class PapyrusEventHandler;
-
   class PapyrusEvent : public IFunctionArguments
   {
-    friend class PapyrusEventHandler;
+    friend class PapyrusEventManager;
     friend class std::unique_ptr<PapyrusEvent>;
 
     public:
@@ -29,5 +27,8 @@ namespace SKU {
 
     private:
     std::vector< std::any > arguments;
+
+    uint32_t sent;
+    uint32_t queued;
   };
 }

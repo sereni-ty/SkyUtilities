@@ -5,17 +5,18 @@
 #include "Net/HTTP/RequestManager.h"
 #include "Net/HTTP/RequestProtocolContext.h"
 
-#include "PapyrusEventHandler.h"
+#include "PapyrusEventManager.h"
 #include "Plugin.h"
 
 #include <regex>
 #include <cctype>
 #include <fstream>
+#include <locale>
 
 namespace SKU::Net::HTTP {
   inline void reformat_response(std::string &response)
   {
-    char s_inb_qmark = false;
+    wchar_t s_inb_qmark = false;
     bool s_tag = false;
     bool s_last_was_alpha = false;
 
@@ -69,7 +70,7 @@ namespace SKU::Net::HTTP {
 
       char before = response[pos];
 
-      if (s_tag == true && s_inb_qmark == false && std::isspace(response[pos]) == true)
+      if (s_tag == true && static_cast<bool>(s_inb_qmark) == false && std::isspace((int) response[pos]) == true)
       {
         if (s_last_was_alpha == false
           || ((pos + 1) < response.length() && response[pos + 1] == '='))
@@ -78,7 +79,7 @@ namespace SKU::Net::HTTP {
         }
       }
 
-      if (std::isalpha(before) == true)
+      if (before >= 0 && before < 255 && static_cast<bool>(std::isalpha((int) before)) == true)
       {
         s_last_was_alpha = true;
       }
@@ -189,7 +190,7 @@ namespace SKU::Net::HTTP {
       }
     }
 
-    PapyrusEventHandler::GetInstance()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
+    Plugin::GetInstance()->GetPapyrusEventManager()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
   }
 
   void LLabModInfoRequestEventHandler::OnRequestFinished(Request::Ptr request) // regular expressions working, 27.05.2017
@@ -300,6 +301,6 @@ namespace SKU::Net::HTTP {
       }
     }
 
-    PapyrusEventHandler::GetInstance()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
+    Plugin::GetInstance()->GetPapyrusEventManager()->Send(Net::Interface::GetEventString(Net::Interface::evModInfoRetrieval), std::move(args));
   }
 }

@@ -5,6 +5,11 @@
 #include <exception>
 
 namespace SKU::Net::HTTP {
+  RequestProtocolContext::~RequestProtocolContext()
+  {
+    Cleanup();
+  }
+
   void RequestProtocolContext::Initialize()
   {
     if (GetOwner() == nullptr)

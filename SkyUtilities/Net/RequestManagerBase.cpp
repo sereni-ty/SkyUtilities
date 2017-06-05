@@ -29,6 +29,7 @@ namespace SKU::Net {
     }
     catch (std::exception)
     {
+      Plugin::Log(LOGL_WARNING, "RequestManagerBase: Failed to remove request..");
     }
   }
 

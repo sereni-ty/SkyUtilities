@@ -1,6 +1,8 @@
 #include "Plugin.h"
 
-#include "PapyrusEventHandler.h"
+#include "Serializeable.h"
+
+#include "PapyrusEventManager.h"
 
 #include "Net/NetInterface.h"
 #include "Net/HTTP/RequestManager.h"
@@ -10,59 +12,53 @@
 #include <skse/skse_version.h>
 #include <skse/PapyrusArgs.h>
 
+#ifdef DEBUG
+# include <debugapi.h>
+#endif
+
 #include <shlobj.h>
 
 #include <mutex>
 #include <list>
 
+// ==== CRITICAL
+// TODO: investigations have to be made.. whenever a request ist saved (thus not completely processed or in the midst of it) the save is not salvageable. find out what exactly causes this behaivor.
+// ====
 // TODO: create test classes to test if TEST macro is set just after "game ready" has been set
 // TODO: might need a configuration file (net: requests per seconds, max response size)
 
 namespace SKU {
   Plugin::Plugin()
-    : is_game_ready(false), is_plugin_active(true)
+    : is_game_ready(false), is_plugin_ready(false)
   {
     Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
+
+#ifdef DEBUG
+    Log(LOGL_INFO, "Waiting for Debugger to attach..");
+
+    while (IsDebuggerPresent() == FALSE)
+    {
+      Sleep(100);
+    }
+
+    Log(LOGL_INFO, "Debugger attached.");
+#endif
   }
 
   Plugin::~Plugin()
-  {
-    Stop();
-
-    Log(LOGL_INFO, "Plugin stopped.");
-  }
-
-  bool Plugin::Initialize()
-  {
-    Log(LOGL_INFO, "Initializing.");
-
-    //
-    // Event handler
-    event_handler_set.emplace(PapyrusEventHandler::GetInstance());
-    event_handler_set.emplace(Net::Interface::GetInstance());
-    event_handler_set.emplace(Net::HTTP::RequestManager::GetInstance());
-
-    return true;
-  }
+  {}
 
   void Plugin::Stop()
   {
-    if (is_plugin_active == false)
-      return;
-
-    is_plugin_active = false;
-
-    event_handler_set.clear();
-
-    Log(LOGL_VERBOSE, "Stopping Interfaces: ");
-    Log(LOGL_VERBOSE, " - Net");
-    Net::Interface::GetInstance()->Stop();
+    is_plugin_ready = false;
   }
 
   bool Plugin::OnSKSEQuery(const SKSEInterface *skse, PluginInfo *info)
   {
     if (skse == nullptr || info == nullptr)
+    {
       return false;
+    }
 
     if (skse->runtimeVersion < RUNTIME_VERSION_1_9_32_0)
     {
@@ -80,7 +76,9 @@ namespace SKU {
   bool Plugin::OnSKSELoad(const SKSEInterface *skse)
   {
     if (skse == nullptr)
+    {
       return false;
+    }
 
     SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
     SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
@@ -101,8 +99,15 @@ namespace SKU {
     skse_serialization->SetSaveCallback(skse->GetPluginHandle(), OnSKSESaveGameProxy);
     skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSELoadGameProxy);
 
-    return skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
-      && skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy);
+    net = std::make_unique<Net::Interface>();
+    papyrus_event_manager = std::make_unique<PapyrusEventManager>();
+
+    is_plugin_ready = skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
+      && skse_messaging->RegisterListener(skse->GetPluginHandle(), "SKSE", Plugin::OnSKSEMessageProxy)
+      && papyrus_event_manager != nullptr
+      && net != nullptr;
+
+    return is_plugin_ready;
   }
 
   bool Plugin::OnSKSERegisterPapyrusFunctionsProxy(VMClassRegistry *registry)
@@ -114,8 +119,7 @@ namespace SKU {
       return false;
     }
 
-    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-      if (event_handler) event_handler->OnSKSERegisterPapyrusFunctions(registry);
+    GetInstance()->net->OnSKSERegisterPapyrusFunctions(registry);
 
     return true;
   }
@@ -131,26 +135,32 @@ namespace SKU {
 
     switch (message->type)
     {
-      case SKSEMessagingInterface::kMessage_PostLoadGame:
       case SKSEMessagingInterface::kMessage_NewGame:
       {
-        Log(LOGL_VERBOSE, "Plugin: Game is ready");
-        GetInstance()->is_game_ready = true;
+        GetInstance()->OnNewGame();
       } break;
 
       case SKSEMessagingInterface::kMessage_PreLoadGame:
       {
-        Log(LOGL_VERBOSE, "Plugin: Game is not ready");
-        GetInstance()->is_game_ready = false;
+        GetInstance()->OnPreLoadGame();
+      } break;
+
+      case SKSEMessagingInterface::kMessage_PostLoadGame:
+      {
+        GetInstance()->OnPostLoadGame();
+      } break;
+
+      case SKSEMessagingInterface::kMessage_SaveGame:
+      {
+        GetInstance()->OnSaveGame();
       } break;
     }
-
-    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
-      if (event_handler) event_handler->OnSKSEMessage(message);
   }
 
   void Plugin::OnSKSESaveGameProxy(SKSESerializationInterface *serialization_interface)
   {
+    std::stack<ISerializeable::SerializationEntity> serialized_entities;
+
     Log(LOGL_INFO, "Plugin: Saving.");
 
     if (serialization_interface == nullptr)
@@ -159,22 +169,35 @@ namespace SKU {
       return;
     }
 
-    for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+    GetInstance()->papyrus_event_manager->Serialize(serialized_entities);
+    GetInstance()->net->Serialize(serialized_entities);
+
+    while (serialized_entities.empty() == false)
     {
-      if (event_handler != nullptr)
+      ISerializeable::SerializationEntity serialized = std::move(serialized_entities.top());
+      serialized_entities.pop();
+
+      if (serialization_interface->OpenRecord(std::get<ISerializeable::idType>(serialized), std::get<ISerializeable::idVersion>(serialized)) == false
+        || serialization_interface->WriteRecordData(std::get<ISerializeable::idStream>(serialized).str().c_str(), std::get<ISerializeable::idStream>(serialized).str().size()) == false)
       {
-        event_handler->OnSKSESaveGame(serialization_interface);
+        Log(LOGL_WARNING, "Plugin: Serialization of %.*s failed (unable to open record). Skipping.",
+          4, reinterpret_cast<char *>(&std::get<ISerializeable::idType>(serialized)));
+      }
+      else
+      {
+        Log(LOGL_VERBOSE, "Plugin: Serialization of %.*s succeeded.",
+          4, reinterpret_cast<char *>(&std::get<ISerializeable::idType>(serialized)));
       }
     }
 
     Log(LOGL_INFO, "Plugin: Saved.");
+
+    GetInstance()->papyrus_event_manager->Unpause();
   }
 
   void Plugin::OnSKSELoadGameProxy(SKSESerializationInterface *serialization_interface)
   {
     Log(LOGL_INFO, "Plugin: Loading.");
-
-    /* TODO: argument for currently open record to onskseloadgame */
 
     if (serialization_interface == nullptr)
     {
@@ -186,21 +209,99 @@ namespace SKU {
 
     while (serialization_interface->GetNextRecordInfo(&type, &version, &length) == true)
     {
-      for (IEventHandler *event_handler : GetInstance()->event_handler_set)
+      ISerializeable::SerializationEntity serialized;
+      std::stringstream streamed_data;
+      std::vector<char> data;
+
+      std::get<ISerializeable::idType>(serialized) = type;
+      std::get<ISerializeable::idVersion>(serialized) = version;
+
+      if (GetInstance()->papyrus_event_manager->IsRequestedSerialization(serialized) == false
+        && GetInstance()->net->IsRequestedSerialization(serialized) == false)
       {
-        if (event_handler != nullptr)
-        {
-          event_handler->OnSKSELoadGame(serialization_interface, type, version, length);
-        }
+        continue;
       }
+
+      data.resize(length);
+      uint32_t length_read = serialization_interface->ReadRecordData(&data[0], length);
+
+      if (length_read != length)
+      {
+        Plugin::Log(LOGL_WARNING, "Plugin: Reading serialized data of record (type: %.*s) failed (size: %d, read: %d). Skipping.",
+          4, reinterpret_cast<char*>(&type), length, length_read);
+
+        continue;
+      }
+
+      streamed_data.write(&data[0], length);
+      data.clear();
+
+      std::get<ISerializeable::idStream>(serialized) = std::move(streamed_data);
+
+      Plugin::Log(LOGL_VERBOSE, "Plugin: Deserialization (record: %.*s)..", 4, reinterpret_cast<char *>(&type));
+
+      GetInstance()->papyrus_event_manager->Deserialize(serialized);
+      GetInstance()->net->Deserialize(serialized);
     }
 
     Log(LOGL_INFO, "Plugin: Loaded.");
   }
 
-  bool Plugin::IsGameReady()
+  void Plugin::OnNewGame()
   {
-    return is_game_ready && is_plugin_active;
+    is_game_ready = true;
+
+    if (IsActive() == false)
+    {
+      return;
+    }
+
+    net->Start();
+  }
+
+  void Plugin::OnSaveGame()
+  {
+    papyrus_event_manager->Pause(); // unpause called in serialization.
+  }
+
+  void Plugin::OnPreLoadGame()
+  {
+    if (is_game_ready == true)
+    {
+      papyrus_event_manager->RemoveRecipients();
+      papyrus_event_manager->UnregisterAll();
+
+      net->Stop();
+    }
+
+    is_game_ready = false;
+  }
+
+  void Plugin::OnPostLoadGame()
+  {
+    is_game_ready = true;
+
+    if (IsActive() == false)
+    {
+      return;
+    }
+
+    net->Start();
+  }
+
+  bool Plugin::IsActive()
+  {
+    return is_game_ready && is_plugin_ready;
+  }
+
+  Net::Interface::Ptr &Plugin::GetNetInterface()
+  {
+    return net;
+  }
+
+  PapyrusEventManager::Ptr &Plugin::GetPapyrusEventManager()
+  {
+    return papyrus_event_manager;
   }
 
   inline
@@ -257,9 +358,6 @@ extern "C"
       case DLL_PROCESS_ATTACH:
       {
         gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
-
-        if (SKU::Plugin::GetInstance()->Initialize() == false)
-          return FALSE;
       } break;
 
       case DLL_PROCESS_DETACH:

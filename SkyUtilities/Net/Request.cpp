@@ -9,10 +9,10 @@ namespace SKU::Net {
   Request::Request(int pre_set_id) noexcept
     : state(sWaitingForSetup)
   {
-    if (pre_set_id > 0)
+    if (pre_set_id > 0) // TODO: Temporary solution. Get ID from a distributor who knows exactly which ids are free to use
     {
       id = pre_set_id;
-      GLOBAL_REQUEST_ID_COUNTER = pre_set_id + 1;
+      GLOBAL_REQUEST_ID_COUNTER = pre_set_id + 100;
     }
     else
     {
@@ -26,13 +26,16 @@ namespace SKU::Net {
   }
 
   void Request::Stop()
+  {}
+
+  void Request::Cleanup()
   {
     if (proto_ctx == nullptr)
     {
       return;
     }
 
-    Plugin::Log(LOGL_VERBOSE, "Request (id: %d): Stopping request.", id);
+    Plugin::Log(LOGL_VERBOSE, "Request (id: %d): Cleaning up request.", id);
 
     proto_ctx->Cleanup();
   }

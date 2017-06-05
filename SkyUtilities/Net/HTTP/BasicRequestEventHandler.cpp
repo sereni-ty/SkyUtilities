@@ -5,7 +5,7 @@
 #include "Net/HTTP/RequestManager.h"
 #include "Net/HTTP/RequestProtocolContext.h"
 
-#include "PapyrusEventHandler.h"
+#include "PapyrusEventManager.h"
 #include "Plugin.h"
 
 #include <curl/curl.h>
@@ -33,6 +33,6 @@ namespace SKU::Net::HTTP {
       args.emplace_back(std::make_any<std::string>());
     }
 
-    PapyrusEventHandler::GetInstance()->Send(Interface::GetEventString(Interface::evHTTPRequestFinished), std::move(args));
+    Plugin::GetInstance()->GetPapyrusEventManager()->Send(Interface::GetEventString(Interface::evHTTPRequestFinished), std::move(args));
   }
 }

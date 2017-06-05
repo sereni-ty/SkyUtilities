@@ -5,25 +5,23 @@
 namespace SKU::Net::HTTP { // TODO: Add failure boolean value to event
   class NexusModInfoRequestEventHandler : public RequestEventHandler
   {
+    REQUEST_EVENT_HANDLER_DEF('NMRH')
+
     public:
     using Ptr = std::shared_ptr<NexusModInfoRequestEventHandler>;
 
     public:
     virtual void OnRequestFinished(Request::Ptr request) final;
-
-    public:
-    static const uint32_t TypeID = 2; // TODO: I know, I know..
   };
 
   class LLabModInfoRequestEventHandler : public RequestEventHandler
   {
+    REQUEST_EVENT_HANDLER_DEF('LLRH')
+
     public:
     using Ptr = std::shared_ptr<LLabModInfoRequestEventHandler>;
 
     public:
     virtual void OnRequestFinished(Request::Ptr request) final;
-
-    public:
-    static const uint32_t TypeID = 3; // TODO: I know, I know..
   };
 }

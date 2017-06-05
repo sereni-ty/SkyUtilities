@@ -53,9 +53,6 @@
     <ClInclude Include="PapyrusEvent.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="PapyrusEventHandler.h">
-      <Filter>Events</Filter>
-    </ClInclude>
     <ClInclude Include="Net\RequestEventHandler.h">
       <Filter>Net</Filter>
     </ClInclude>
@@ -64,6 +61,12 @@
     </ClInclude>
     <ClInclude Include="Net\HTTP\ModInfoRequestEventHandler.h">
       <Filter>Net\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializeable.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="PapyrusEventManager.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,14 +92,14 @@
     <ClCompile Include="PapyrusEvent.cpp">
       <Filter>Events</Filter>
     </ClCompile>
-    <ClCompile Include="PapyrusEventHandler.cpp">
-      <Filter>Events</Filter>
-    </ClCompile>
     <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp">
       <Filter>Net\HTTP</Filter>
     </ClCompile>
     <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp">
       <Filter>Net\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="PapyrusEventManager.cpp">
+      <Filter>Events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

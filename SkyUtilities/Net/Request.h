@@ -39,6 +39,8 @@ namespace SKU::Net {
     public:
     void Stop();
 
+    void Cleanup();
+
     public:
     int GetID() noexcept;
     State GetState() noexcept;

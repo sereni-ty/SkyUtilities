@@ -1,6 +1,6 @@
 #include "PapyrusEvent.h"
 
-#include "PapyrusEventHandler.h"
+#include "PapyrusEventManager.h"
 #include "Plugin.h"
 
 #include <utility>
@@ -8,6 +8,7 @@
 
 namespace SKU {
   PapyrusEvent::PapyrusEvent(Args &&args) noexcept
+    : sent(0), queued(0)
   {
     arguments = std::move(args);
   }
@@ -59,6 +60,6 @@ namespace SKU {
       }
     }
 
-    return true;
+    return ++sent > 0;
   }
 }

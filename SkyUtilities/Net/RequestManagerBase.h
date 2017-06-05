@@ -21,6 +21,7 @@ namespace SKU::Net {
 
     public:
     virtual void Initialize() = 0;
+    virtual void Cleanup() = 0;
 
     virtual void Stop() = 0;
     virtual void Start() = 0;

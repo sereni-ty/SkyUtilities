@@ -6,18 +6,20 @@
 #include "Net/NetInterface.h"
 
 #include "Plugin.h"
-#include "PapyrusEventHandler.h"
+#include "PapyrusEventManager.h"
 
 #include <mutex>
 
 namespace SKU::Net::HTTP {
   RequestManager::RequestManager()
     : should_run(false), curl_handle(nullptr)
-  {}
+  {
+    Initialize();
+  }
 
   RequestManager::~RequestManager()
   {
-    Stop();
+    Cleanup();
   }
 
   inline Request::Ptr RequestManager::GetRequestByHandle(CURL *curl_handle)
@@ -35,51 +37,24 @@ namespace SKU::Net::HTTP {
 
   void RequestManager::Initialize()
   {
+    should_run = false;
+    processing_thread = std::future<void>();
+
     if (curl_handle == nullptr)
     {
       curl_handle = curl_multi_init();
     }
   }
 
-  void RequestManager::Stop()
+  void RequestManager::Cleanup()
   {
-    should_run = false;
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Cleaning up..");
 
-    if (pool.Get().empty() != true)
+    while (pool.Get().empty() == false)
     {
-      for (auto request : pool.Get())
-      {
-        if (request == nullptr)
-          continue;
+      Request::Ptr request = *pool.Get().begin();
 
-        request->Lock();
-
-        Request::State state = request->GetState();
-
-        if (state != Request::sOK && state != Request::sFailed) // Manager stops. Remaining, unprocessed requests default to failure state
-        {
-          request->SetState(Request::sFailed);
-        }
-
-        RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
-
-        if (ctx == nullptr)
-          continue;
-
-        Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) is being removed (curl_multi_remove_handle()).", request->GetID());
-
-        if (curl_handle != nullptr)
-        {
-          curl_last_error = curl_multi_remove_handle(curl_handle, ctx->curl_handle);
-
-          if (curl_last_error != CURLM_OK)
-          {
-            Plugin::Log(LOGL_INFO, "(HTTP) RequestManager: curl_multi_remove_handle() failed with error code %d. This shouldn't really happen.", curl_last_error);
-          }
-        }
-
-        request->Stop();
-      }
+      RemoveRequest(request);
     }
 
     if (curl_handle != nullptr)
@@ -88,19 +63,90 @@ namespace SKU::Net::HTTP {
       curl_handle = nullptr;
     }
 
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Cleaned up..");
+  }
+
+  void RequestManager::Stop()
+  {
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Stopping..");
+
+    should_run = false;
+
+    if (processing_thread.valid() == true)
+    {
+      processing_thread.wait();
+    }
+
+    processing_thread = std::future<void>();
+
+    if (curl_handle == nullptr && pool.Get().empty() == true)
+    {
+      return; // Already stopped.
+    }
+
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Stopping requests..");
+    for (auto request : pool.Get())
+    {
+      if (request == nullptr)
+      {
+        continue;
+      }
+
+      request->Lock();
+      RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+
+      if (ctx == nullptr)
+      {
+        Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Request (id: %d) has no context.", request->GetID());
+
+        request->Unlock();
+        continue;
+      }
+
+      if (ctx->curl_handle == nullptr)
+      {
+        Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Request (id: %d) has invalid handle.", request->GetID());
+
+        request->Unlock();
+        continue;
+      }
+
+      if (request->GetState() > Request::sOK)
+      {
+        CURLcode res = curl_easy_pause(ctx->curl_handle, CURLPAUSE_ALL);
+
+        if (res != CURLE_OK)
+        {
+          Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Failed to pause request (id: %d, error: %d).", request->GetID(), res);
+        }
+        else
+        {
+          Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Paused request (id: %d).", request->GetID());
+
+          request->Stop();
+        }
+      }
+
+      request->Unlock();
+    }
+
     Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Stopped.");
   }
 
-  void RequestManager::Start()
+  void RequestManager::Start() // TODO: Resume paused requests
   {
     static std::mutex thread_creation_mtx;
     std::lock_guard<std::mutex> guard(thread_creation_mtx);
 
+    if (curl_handle == nullptr)
+    {
+      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Not starting due to missing initialization.");
+      return;
+    }
+
     Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Start");
 
-    Initialize();
-
-    should_run = true;
+    should_run = true; // TODO: Initialize and should_run should be placed somewhere else
 
     if (processing_thread.valid() == false
       || processing_thread.wait_for(std::chrono::seconds(0)) != std::future_status::timeout)
@@ -112,7 +158,7 @@ namespace SKU::Net::HTTP {
 
   void RequestManager::Process()
   {
-    RequestManager *mgr = RequestManager::GetInstance();
+    RequestManager::Ptr &mgr = Plugin::GetInstance()->GetNetInterface()->GetHTTPRequestManager();
     std::list<Request::Ptr> requests;
     int handle_reset_counter = 0, no_request_counter = 0;
 
@@ -120,7 +166,7 @@ namespace SKU::Net::HTTP {
 
     Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Starting to process requests");
 
-    while (Plugin::GetInstance()->IsGameReady()
+    while (Plugin::GetInstance()->IsActive()
       && mgr->should_run
       && no_request_counter < 3)
     {
@@ -129,7 +175,7 @@ namespace SKU::Net::HTTP {
         /* check: on pending requests */
         bool processed_pending_requests = mgr->CheckPendingRequests();
 
-        if (mgr->pool.GetCountByStateExceptions({Request::sFailed, Request::sOK}) == 0	// Only work if there are requests left to work on
+        if (mgr->pool.GetCountByStateExceptions({Request::sFailed, Request::sOK, Request::sBlacklisted}) == 0	// Only work if there are requests left to work on
           && processed_pending_requests == false)												// Try again in 200ms.
         {
           std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -166,7 +212,7 @@ namespace SKU::Net::HTTP {
             //
 
             Plugin::Log(LOGL_CRITICAL, "(HTTP) RequestManager: Internal CURL error occured. Stopping Net Interface.");
-            Net::Interface::GetInstance()->Stop();
+            Plugin::GetInstance()->GetNetInterface()->Stop();
             continue;
           } break;
 
@@ -217,29 +263,37 @@ namespace SKU::Net::HTTP {
 
     for (Request::Ptr &request : requests)
     {
-      request->Lock();
       RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
-      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Setting up request (id: %d)", request->GetID());
-
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_URL, ctx->url.c_str());
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEFUNCTION, OnRequestResponse);
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEDATA, (void*) request->GetID());
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_TIMEOUT_MS, request->GetTimeout());
-      curl_easy_setopt(ctx->curl_handle, CURLOPT_FOLLOWLOCATION, TRUE);
-
-      switch (ctx->method)
+      if (ctx == nullptr)
       {
-        case RequestProtocolContext::mPOST:
-        {
-          curl_easy_setopt(ctx->curl_handle, CURLOPT_COPYPOSTFIELDS, ctx->body.c_str());
-        } break;
+        RemoveRequest(request);
       }
+      else if (request->GetState() == Request::sWaitingForSetup)
+      {
+        request->Lock();
 
-      request->SetState(Request::sReady);
-      request->Unlock();
+        Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Setting up request (id: %d)", request->GetID());
+
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_URL, ctx->url.c_str());
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEFUNCTION, OnRequestResponse);
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_WRITEDATA, (void*) request->GetID());
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_TIMEOUT_MS, request->GetTimeout());
+        curl_easy_setopt(ctx->curl_handle, CURLOPT_FOLLOWLOCATION, TRUE);
+
+        switch (ctx->method)
+        {
+          case RequestProtocolContext::mPOST:
+          {
+            curl_easy_setopt(ctx->curl_handle, CURLOPT_COPYPOSTFIELDS, ctx->body.c_str());
+          } break;
+        }
+
+        request->SetState(Request::sReady);
+        request->Unlock();
+      }
     }
 
     return true;
@@ -254,32 +308,47 @@ namespace SKU::Net::HTTP {
 
     for (Request::Ptr &request : requests)
     {
-      request->Lock();
-
-      curl_last_error = curl_multi_add_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
-
-      if (curl_last_error != CURLM_OK
-        && curl_last_error != CURLM_ADDED_ALREADY)
+      if (request->GetState() == Request::sReady)
       {
-        request->Unlock();
+        RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
-        switch (curl_last_error)
+        if (ctx == nullptr)
         {
-          case CURLM_BAD_EASY_HANDLE: // Could be a request removed? Anyway, try to clean that one up. Your journey is over here, little one.
-          {
-            Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) has bad handle", request->GetID());
-
-            request->Stop();
-            request->SetState(Request::sFailed);
-          } break;
-
-          default: throw std::exception();
+          RemoveRequest(request);
         }
-      }
-      else
-      {
-        request->SetState(Request::sPending);
-        request->Unlock();
+
+        else
+        {
+          request->Lock();
+
+          curl_last_error = curl_multi_add_handle(curl_handle, ctx->curl_handle);
+
+          switch (curl_last_error)
+          {
+            case CURLM_ADDED_ALREADY:
+            case CURLM_OK:
+              break;
+
+            case CURLM_BAD_EASY_HANDLE: // Could be a request removed? Anyway, try to clean that one up. Your journey is over here, little one.
+            {
+              Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) has bad handle", request->GetID());
+
+              request->SetState(Request::sFailed);
+              request->Unlock();
+
+              RemoveRequest(request);
+            } continue;
+
+            default:
+            {
+              request->Unlock();
+              throw std::exception();
+            } break;
+          }
+
+          request->SetState(Request::sPending);
+          request->Unlock();
+        }
       }
     }
 
@@ -297,7 +366,9 @@ namespace SKU::Net::HTTP {
       case CURLM_CALL_MULTI_PERFORM:
       {
         if (call_counter < 3)
+        {
           goto call_again;
+        }
       } break;
 
       default: throw std::exception();
@@ -322,10 +393,10 @@ namespace SKU::Net::HTTP {
         continue;
       }
 
-      Request::Ptr &request = GetRequestByHandle(info->easy_handle);
+      Request::Ptr request = GetRequestByHandle(info->easy_handle);
 
       if (request == nullptr) // Request not found.
-      {						// TODO: Request state was changed? Check that.
+      {						// TODO: Remove request ..
         Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Request was answered but (internally) not found.");
 
         curl_easy_cleanup(info->easy_handle); // Let the dead rest.
@@ -342,10 +413,16 @@ namespace SKU::Net::HTTP {
 
       RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
-      request->SetState(info->data.result == CURLE_OK ? Request::sOK : Request::sFailed);
-      ctx->curl_last_error = info->data.result; // TODO: Think about how to pass info data..
+      if (ctx == nullptr)
+      {
+        Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) without context.", request->GetID());
 
-      curl_last_error = curl_multi_remove_handle(curl_handle, ctx->curl_handle);
+        request->Unlock();
+        continue;
+      }
+
+      request->SetState(info->data.result == CURLE_OK ? Request::sOK : Request::sFailed);
+      ctx->curl_last_error = info->data.result;
 
       Plugin::Log(LOGL_DETAILED, "Request (id: %d, error code: %d) has %s",
         request->GetID(),
@@ -354,25 +431,20 @@ namespace SKU::Net::HTTP {
 
       if (request->GetHandler() == nullptr)
       {
-        Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) has no handler to call. Skipping.",
+        Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) has no handler to call. Skipping.",
           request->GetID());
       }
       else
       {
-        Plugin::Log(LOGL_VERBOSE, "RequestManager: Calling request (id: %d) handler.",
+        Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Calling request (id: %d) handler.",
           request->GetID());
 
-        ctx->response.push_back('\0');
         request->GetHandler()->OnRequestFinished(request);
       }
 
-      request->Stop();
       request->Unlock();
 
-      if (curl_last_error != CURLM_OK)
-      {
-        throw std::exception();
-      }
+      RemoveRequest(request);
     }
 
     return handled_requests > 0;
@@ -380,47 +452,37 @@ namespace SKU::Net::HTTP {
 
   void RequestManager::OnRequestAdded(Request::Ptr request)
   {
-    if (request == nullptr)
-    {
-      return;
-    }
-
-    Initialize();
-
-    if (request->GetState() != Request::sFailed)
-    {
-      curl_multi_add_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
-    }
-
     Start();
   }
 
   void RequestManager::OnRequestRemoval(Request::Ptr request)
   {
-    if (request == nullptr || curl_handle == nullptr)
+    if (request == nullptr)
     {
       return;
     }
 
     request->Lock();
 
-    curl_multi_remove_handle(curl_handle, request->GetProtocolContext<RequestProtocolContext>()->curl_handle);
+    RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
-    request->Stop();
-
-    Request::State state = request->GetState();
-
-    if (state != Request::sOK && state != Request::sFailed)
+    if (ctx != nullptr && curl_handle != nullptr)
     {
-      request->SetState(Request::sFailed); // TODO: (Consideration) Necessary to implement a separate state for stopped requests?
+      curl_multi_remove_handle(curl_handle, ctx->curl_handle);
     }
 
+    if (request->GetState() > Request::sOK)
+    {
+      request->SetState(Request::sFailed);
+    }
+
+    request->Cleanup();
     request->Unlock();
   }
 
   size_t RequestManager::OnRequestResponse(char* data, size_t size, size_t nmemb, void *request_id)
   {
-    Request::Ptr &request = RequestManager::GetInstance()->pool.GetRequestByID((int) request_id);
+    Request::Ptr &request = Plugin::GetInstance()->GetNetInterface()->GetHTTPRequestManager()->pool.GetRequestByID((int) request_id);
 
     if (request == nullptr)
     {
@@ -432,140 +494,114 @@ namespace SKU::Net::HTTP {
 
     if (new_size > RESPONSE_MAX_SIZE)
     {
-      Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) exceeded response limit (%dKB). Stopping request.",
+      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) exceeded response limit (%dKB). Stopping request.",
         request->GetID(), RESPONSE_MAX_SIZE / 1024);
 
       request->SetState(Request::sFailed);
-      //request->Stop();
-
-      return -1;
+      return -1; // Will appear as info message in CheckPendingRequests()
     }
 
-    Plugin::Log(LOGL_VERBOSE, "RequestManager: Request (id: %d) was answered with %d bytes.", (int) request_id, size*nmemb);
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) was answered with %d bytes.", (int) request_id, size*nmemb);
     request->GetProtocolContext<RequestProtocolContext>()->response.append(data, size*nmemb);
 
     return size*nmemb;
   }
 
-  void RequestManager::OnSKSESaveGame(SKSESerializationInterface *serilization_interface)
+  void RequestManager::Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities)
   {
-    Plugin::Log(LOGL_VERBOSE, "RequestManager: Saving unprocessed requests.");
+    SerializationEntity serialized;
+    uint32_t unfinished_requests;
 
-    uint32_t unprocessed = 0;
-    bool write_fail = true;
+    std::get<ISerializeable::idType>(serialized) = PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE;
+    std::get<ISerializeable::idVersion>(serialized) = PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION;
+    std::get<ISerializeable::idStream>(serialized) = std::stringstream();
 
-    if ((unprocessed = pool.GetCountByStateExceptions({Request::sFailed, Request::sOK})) == 0)
+    if ((unfinished_requests = pool.GetCountByStateExceptions({Request::sBlacklisted, Request::sFailed, Request::sOK})) == 0)
     {
-      Plugin::Log(LOGL_VERBOSE, "RequestManager: Nothing to save.");
+      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Nothing to save.");
       return;
     }
 
-    if (serilization_interface->OpenRecord(PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE, PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION) == false)
-    {
-      Plugin::Log(LOGL_WARNING, "RequestManager: Unable to save data.");
-      return;
-    }
+    SerializeIntegral(serialized, unfinished_requests);
 
-    Plugin::Log(LOGL_VERBOSE, "RequestManager: %d unprocessed requests going to be saved", unprocessed);
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Saving %d requests.",
+      unfinished_requests);
 
-    if (serilization_interface->WriteRecordData(&unprocessed, 4) == true)
+    for (Request::Ptr request : pool.Get())
     {
-      for (Request::Ptr request : pool.Get())
+      RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
+
+      if (request->GetState() <= Request::sOK || ctx == nullptr)
       {
-        if (request->GetState() == Request::sFailed
-          || request->GetState() == Request::sOK)
-        {
-          continue;
-        }
-
-        Plugin::Log(LOGL_VERBOSE, "RequestManager: Saving request. %d requests to save remaining.", --unprocessed);
-
-        uint32_t tmp;
-        RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
-        write_fail = true;
-
-        if (ctx == nullptr)
-        {
-          Plugin::Log(LOGL_VERBOSE, "RequestManager: Request has no context information. Skipping.");
-          write_fail = false;
-          continue;
-        }
-
-        FAIL_BREAK_WRITE(serilization_interface, &(tmp = request->GetID()), 4);
-        FAIL_BREAK_WRITE(serilization_interface, &(tmp = request->GetTimeout()), 4);
-        FAIL_BREAK_WRITE(serilization_interface, &request->GetHandler()->TypeID, 4);
-
-        FAIL_BREAK_WRITE(serilization_interface, &(tmp = ctx->url.size()), 4);
-        FAIL_BREAK_WRITE(serilization_interface, ctx->url.c_str(), tmp);
-
-        FAIL_BREAK_WRITE(serilization_interface, &(tmp = ctx->body.size()), 4);
-        FAIL_BREAK_WRITE(serilization_interface, ctx->body.c_str(), tmp);
-
-        FAIL_BREAK_WRITE(serilization_interface, &ctx->method, sizeof(RequestProtocolContext::Method));
-
-        write_fail = false;
+        continue;
       }
+
+      SerializeIntegral(serialized, request->GetID());
+      SerializeIntegral(serialized, request->GetTimeout());
+      SerializeIntegral(serialized, request->GetHandler()->GetTypeID());
+      SerializeString(serialized, ctx->url);
+      SerializeString(serialized, ctx->body);
+      SerializeIntegral(serialized, ctx->method);
+
+      if (std::get<ISerializeable::idStream>(serialized).fail() == true)
+      {
+        break;
+      }
+
+      unfinished_requests--;
     }
 
-    if (write_fail == true)
+    if (unfinished_requests != 0) // TODO: handle that
     {
-      Plugin::Log(LOGL_WARNING, "RequestManager: Failed to write save data");
+      Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Reverting due to unmatched request count.");
+      // for now: revert.
+      std::get<ISerializeable::idStream>(serialized).str("");
     }
+
+    serialized_entities.push(std::move(serialized));
   }
 
-  void RequestManager::OnSKSELoadGame(SKSESerializationInterface *serilization_interface, SInt32 type, SInt32 version, SInt32 length)
+  void RequestManager::Deserialize(ISerializeable::SerializationEntity &serialized)
   {
-    if (type != PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE)
+    int unfinished_requests = 0;
+
+    if (IsRequestedSerialization(serialized) == false)
     {
       return;
     }
 
-    if (length == 0)
+    if (std::get<ISerializeable::idStream>(serialized).tellg() == std::streampos(0))
     {
-      Plugin::Log(LOGL_INFO, "RequestManager: Nothing to load.");
+      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Nothing to load.");
       return;
     }
 
-    if (version != PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION)
+    DeserializeIntegral(serialized, unfinished_requests);
+
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Loading %d requests from save.",
+      unfinished_requests);
+
+    for (int i = 0; i < unfinished_requests; i++)
     {
-      Plugin::Log(LOGL_WARNING, "RequestManager: Unsupported data version.");
-      return;
-    }
+      int id;
+      uint32_t timeout, handler_type_id;
+      std::string url, body;
+      RequestProtocolContext::Method method;
 
-    Plugin::Log(LOGL_VERBOSE, "RequestManager: Loading unprocessed requests.");
+      DeserializeIntegral(serialized, id);
+      DeserializeIntegral(serialized, timeout);
+      DeserializeIntegral(serialized, handler_type_id);
+      DeserializeString(serialized, url);
+      DeserializeString(serialized, body);
+      DeserializeIntegral(serialized, method);
 
-    uint32_t unprocessed = 0;
-    bool read_fail = false;
+      Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Deserialized.. ID=%d, Timeout=%d, Handler=%d, URL=%s, Body=%s, Method=%d",
+        id, timeout, handler_type_id, url.c_str(), body.c_str(), method);
 
-    if (serilization_interface->ReadRecordData(&unprocessed, 4) != 4)
-    {
-      Plugin::Log(LOGL_WARNING, "RequestManager: Unable to load data from save.");
-      return;
-    }
+      Request::Ptr request = Request::Create<RequestProtocolContext>(id);
+      HTTP::RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
 
-    Plugin::Log(LOGL_VERBOSE, "RequestManager: Loading %d requests from save.", unprocessed);
-
-    while (unprocessed-- > 0)
-    {
-      Request::Ptr request = nullptr;
-      HTTP::RequestProtocolContext::Ptr ctx = nullptr;
-
-      size_t tmp;
-      std::vector<char> buf;
-
-      read_fail = true;
-
-      FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(int)); // id
-
-      request = Request::Create<HTTP::RequestProtocolContext>(tmp);
-      ctx = request->GetProtocolContext<HTTP::RequestProtocolContext>();
-
-      FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // timeout
-      request->SetTimeout(tmp);
-
-      FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // handler
-
-      switch (tmp)
+      switch (handler_type_id)
       {
         case HTTP::BasicRequestEventHandler::TypeID:
         {
@@ -581,49 +617,35 @@ namespace SKU::Net::HTTP {
         {
           request->SetHandler(std::make_shared<HTTP::LLabModInfoRequestEventHandler>());
         } break;
+
+        default: continue;
       }
 
-      FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // url size
+      request->SetTimeout(timeout);
+      ctx->Initialize(method, url, body);
 
-      try
-      {
-        buf.resize(tmp + 1, 0);
-      }
-      catch (std::exception)
-      {
-        break;
-      }
-
-      FAIL_BREAK_READ(serilization_interface, &buf[0], tmp); // url
-      ctx->url = std::string(&buf[0]);
-
-      FAIL_BREAK_READ(serilization_interface, &tmp, sizeof(size_t)); // body size
-
-      try
-      {
-        buf.clear();
-        buf.resize(tmp + 1, 0);
-      }
-      catch (std::exception)
-      {
-        break;
-      }
-
-      FAIL_BREAK_READ(serilization_interface, &buf[0], tmp); // body
-      ctx->body = std::string(&buf[0]);
-
-      FAIL_BREAK_READ(serilization_interface, &ctx->method, sizeof(HTTP::RequestProtocolContext::Method));
-
-      ctx->Initialize();
       AddRequest(request);
-
-      read_fail = false;
     }
 
-    if (read_fail == true)
+    if (std::get<ISerializeable::idStream>(serialized).fail() == true)
     {
-      Plugin::Log(LOGL_WARNING, "RequestManager: Unable to load data from save");
-      return;
+      Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Error occurred while loading.");
     }
+  }
+
+  bool RequestManager::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
+  {
+    if (std::get<ISerializeable::idType>(serialized) != PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE)
+    {
+      return false;
+    }
+
+    if (std::get<ISerializeable::idVersion>(serialized) != PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION)
+    {
+      Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Unsupported data version.");
+      return false;
+    }
+
+    return true;
   }
 }

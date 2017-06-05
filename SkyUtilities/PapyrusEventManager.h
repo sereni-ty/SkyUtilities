@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Singleton.h"
-#include "Events.h"
+#include "Serializeable.h"
 #include "PapyrusEvent.h"
 
 #include <skse/PapyrusVM.h>
@@ -14,6 +13,7 @@
 #include <vector>
 #include <any>
 #include <string>
+#include <memory>
 
 #define PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_TYPE MACRO_SWAP32('PESU')
 #define PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_VERSION 1
@@ -21,11 +21,20 @@
 namespace SKU {
   using PapyrusEventRecipient = uint64_t;
 
-  class PapyrusEventHandler : public Singleton<PapyrusEventHandler>, public IEventHandler
+  class PapyrusEventManager :public ISerializeable
   {
-    IS_SINGLETON_CLASS(PapyrusEventHandler)
+    friend bool PapyrusEvent::Copy(Output * dst);
 
-      friend class PapyrusEvent;
+    public:
+    using Ptr = std::unique_ptr<PapyrusEventManager>;
+
+    public:
+    PapyrusEventManager();
+    ~PapyrusEventManager();
+
+    public:
+    void Pause();
+    void Unpause();
 
     public:
     bool Send(const std::string &event_name, PapyrusEvent::Args &&args);
@@ -35,8 +44,11 @@ namespace SKU {
     void Unregister(const std::string &event_name);
     void UnregisterAll();
 
+    public:
+    bool Remaining(const std::string &event_name);
+
     protected:
-    void Cleanup(const PapyrusEvent *event);
+    void Cleanup();
 
     public:
     bool AddRecipient(const std::string &event_name, TESForm *recipient);
@@ -45,9 +57,12 @@ namespace SKU {
     //void RemoveRecipientEntirely(TESForm *recipient);
     void RemoveRecipients();
 
+    // ISerializeable
+    //
     public:
-    void OnSKSESaveGame(SKSESerializationInterface *serilization_interface);
-    void OnSKSELoadGame(SKSESerializationInterface *serilization_interface, SInt32 type, SInt32 version, SInt32 length);
+    virtual void Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities) final;
+    virtual void Deserialize(ISerializeable::SerializationEntity &serialized) final;
+    virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
 
     private:
     using RecipientMap = std::unordered_map</* event name: */std::string, std::unordered_set< PapyrusEventRecipient > >;
@@ -57,5 +72,7 @@ namespace SKU {
     RecipientMap recipient_map;
     EventMap event_map;
     EventKeyMap event_key_map;
+
+    bool pause;
   };
 }
