@@ -21,9 +21,6 @@
 #include <mutex>
 #include <list>
 
-// ==== CRITICAL
-// TODO: investigations have to be made.. whenever a request ist saved (thus not completely processed or in the midst of it) the save is not salvageable. find out what exactly causes this behaivor.
-// ====
 // TODO: create test classes to test if TEST macro is set just after "game ready" has been set
 // TODO: might need a configuration file (net: requests per seconds, max response size)
 

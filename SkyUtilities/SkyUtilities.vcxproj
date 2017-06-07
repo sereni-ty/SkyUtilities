@@ -159,7 +159,7 @@
       <AdditionalIncludeDirectories>E:\dev\projects\Libraries\boost_1_63_0;E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-debug-static-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>common/IPrefix.h</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_WINDLL;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_WINDLL;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <PostBuildEvent>
