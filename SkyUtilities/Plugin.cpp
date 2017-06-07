@@ -33,7 +33,7 @@ namespace SKU {
   {
     Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
 
-#ifdef DEBUG
+#if defined(DEBUG)
     Log(LOGL_INFO, "Waiting for Debugger to attach..");
 
     while (IsDebuggerPresent() == FALSE)
@@ -227,7 +227,7 @@ namespace SKU {
 
       if (length_read != length)
       {
-        Plugin::Log(LOGL_WARNING, "Plugin: Reading serialized data of record (type: %.*s) failed (size: %d, read: %d). Skipping.",
+        Log(LOGL_WARNING, "Plugin: Reading serialized data of record (type: %.*s) failed (size: %d, read: %d). Skipping.",
           4, reinterpret_cast<char*>(&type), length, length_read);
 
         continue;
@@ -238,7 +238,7 @@ namespace SKU {
 
       std::get<ISerializeable::idStream>(serialized) = std::move(streamed_data);
 
-      Plugin::Log(LOGL_VERBOSE, "Plugin: Deserialization (record: %.*s)..", 4, reinterpret_cast<char *>(&type));
+      Log(LOGL_VERBOSE, "Plugin: Deserialization (record: %.*s)..", 4, reinterpret_cast<char *>(&type));
 
       GetInstance()->papyrus_event_manager->Deserialize(serialized);
       GetInstance()->net->Deserialize(serialized);
@@ -312,8 +312,10 @@ namespace SKU {
     va_list args;
     std::string cfmt;
 
-    /*if (level > DEBUG)
-      return;*/
+    if (level > LOGLEVEL)
+    {
+      return;
+    }
 
     va_start(args, fmt);
 
