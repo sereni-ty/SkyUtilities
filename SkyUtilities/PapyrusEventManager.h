@@ -65,7 +65,7 @@ namespace SKU {
     virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
 
     private:
-    using RecipientMap = std::unordered_map</* event name: */std::string, std::unordered_set< PapyrusEventRecipient > >;
+    using RecipientMap = std::unordered_map</* event name: */std::string, std::unordered_set< PapyrusEventRecipient > >; // TODO: turn around.. makes more sense
     using EventMap = std::unordered_map </* event name: */std::string, std::unordered_set< std::unique_ptr<PapyrusEvent> > >;
     using EventKeyMap = std::unordered_map < std::string, BSFixedString >;
 

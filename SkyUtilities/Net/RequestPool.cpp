@@ -5,6 +5,10 @@
 #include <algorithm>
 
 namespace SKU::Net {
+  RequestPool::RequestPool()
+    : pool()
+  {}
+
   Request::Ptr RequestPool::GetRequestByID(int id)
   {
     auto& request_pos = std::find_if(pool.begin(), pool.end(), [&] (Request::Ptr request) -> bool
@@ -49,6 +53,11 @@ namespace SKU::Net {
         return request->GetState() == state_exception;
       });
     });
+  }
+
+  std::pair< std::set<Request::Ptr>::iterator, bool > RequestPool::AddRequest(Request::Ptr request)
+  {
+    return pool.emplace(request);
   }
 
   std::set<Request::Ptr> &RequestPool::Get() noexcept

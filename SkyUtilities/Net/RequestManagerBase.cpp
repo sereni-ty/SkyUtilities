@@ -3,20 +3,25 @@
 #include "Plugin.h"
 
 namespace SKU::Net {
+  RequestManagerBase::RequestManagerBase()
+    : pool()
+  {}
+
   bool RequestManagerBase::AddRequest(Request::Ptr request) noexcept
   {
     try
     {
-      pool.Get().insert(request);
+      if (pool.AddRequest(request).second == true)
+      {
+        OnRequestAdded(request);
+        return true;
+      }
     }
     catch (std::exception e)
     {
-      return false;
     }
 
-    OnRequestAdded(request);
-
-    return true;
+    return false;
   }
 
   void RequestManagerBase::RemoveRequest(Request::Ptr request)

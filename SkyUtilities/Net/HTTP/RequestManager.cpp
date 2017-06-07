@@ -146,7 +146,7 @@ namespace SKU::Net::HTTP {
 
     Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Start");
 
-    should_run = true; // TODO: Initialize and should_run should be placed somewhere else
+    should_run = true;
 
     if (processing_thread.valid() == false
       || processing_thread.wait_for(std::chrono::seconds(0)) != std::future_status::timeout)
@@ -159,7 +159,6 @@ namespace SKU::Net::HTTP {
   void RequestManager::Process()
   {
     RequestManager::Ptr &mgr = Plugin::GetInstance()->GetNetInterface()->GetHTTPRequestManager();
-    std::list<Request::Ptr> requests;
     int handle_reset_counter = 0, no_request_counter = 0;
 
     mgr->curl_last_error = CURLM_OK;
@@ -396,7 +395,7 @@ namespace SKU::Net::HTTP {
       Request::Ptr request = GetRequestByHandle(info->easy_handle);
 
       if (request == nullptr) // Request not found.
-      {						// TODO: Remove request ..
+      {
         Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Request was answered but (internally) not found.");
 
         curl_easy_cleanup(info->easy_handle); // Let the dead rest.
@@ -452,7 +451,11 @@ namespace SKU::Net::HTTP {
 
   void RequestManager::OnRequestAdded(Request::Ptr request)
   {
-    Start();
+    if (Plugin::GetInstance()->IsActive() == true)
+    {
+      Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Starting..");
+      Start();
+    }
   }
 
   void RequestManager::OnRequestRemoval(Request::Ptr request)
@@ -541,7 +544,7 @@ namespace SKU::Net::HTTP {
       SerializeIntegral(serialized, request->GetHandler()->GetTypeID());
       SerializeString(serialized, ctx->url);
       SerializeString(serialized, ctx->body);
-      SerializeIntegral(serialized, ctx->method);
+      SerializeIntegral<uint32_t>(serialized, ctx->method);
 
       if (std::get<ISerializeable::idStream>(serialized).fail() == true)
       {
@@ -565,12 +568,16 @@ namespace SKU::Net::HTTP {
   {
     int unfinished_requests = 0;
 
+    int id;
+    uint32_t timeout, handler_type_id, method;
+    std::string url, body;
+
     if (IsRequestedSerialization(serialized) == false)
     {
       return;
     }
 
-    if (std::get<ISerializeable::idStream>(serialized).tellg() == std::streampos(0))
+    if (std::get<ISerializeable::idStream>(serialized).tellp() == std::streampos(0))
     {
       Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Nothing to load.");
       return;
@@ -583,10 +590,11 @@ namespace SKU::Net::HTTP {
 
     for (int i = 0; i < unfinished_requests; i++)
     {
-      int id;
-      uint32_t timeout, handler_type_id;
-      std::string url, body;
-      RequestProtocolContext::Method method;
+      Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Deserializing Request..");
+
+      id = timeout = handler_type_id = method = 0;
+      url.clear();
+      body.clear();
 
       DeserializeIntegral(serialized, id);
       DeserializeIntegral(serialized, timeout);
@@ -595,8 +603,14 @@ namespace SKU::Net::HTTP {
       DeserializeString(serialized, body);
       DeserializeIntegral(serialized, method);
 
-      Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Deserialized.. ID=%d, Timeout=%d, Handler=%d, URL=%s, Body=%s, Method=%d",
-        id, timeout, handler_type_id, url.c_str(), body.c_str(), method);
+      if (std::get<ISerializeable::idStream>(serialized).fail() == true)
+      {
+        Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Failed to deserialize data.. Aborting.");
+        return;
+      }
+
+      Plugin::Log(LOGL_DETAILED, "(HTTP) RequestManager: Deserialized.. ID=%d, Timeout=%d, Handler=%d, URL=%s, Body=%d (length), Method=%d",
+        id, timeout, handler_type_id, url.c_str(), body.length(), method);
 
       Request::Ptr request = Request::Create<RequestProtocolContext>(id);
       HTTP::RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
@@ -622,9 +636,8 @@ namespace SKU::Net::HTTP {
       }
 
       request->SetTimeout(timeout);
-      ctx->Initialize(method, url, body);
-
-      AddRequest(request);
+      ctx->Initialize(static_cast<HTTP::RequestProtocolContext::Method>(method), url, body);
+      AddRequest(std::move(request));
     }
 
     if (std::get<ISerializeable::idStream>(serialized).fail() == true)

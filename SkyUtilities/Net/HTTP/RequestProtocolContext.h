@@ -12,11 +12,13 @@ namespace SKU::Net::HTTP {
     using Ptr = std::shared_ptr<RequestProtocolContext>;
 
     public:
+    RequestProtocolContext();
     ~RequestProtocolContext();
 
     public:
     enum Method
     {
+      mNotSet,
       mPOST = 0,
       mGET,
     };

@@ -29,40 +29,71 @@ namespace SKU {
     virtual bool IsRequestedSerialization(SerializationEntity &serialized)
     {
       return false;
-    };
-
-    protected:
-    template<class T = std::is_integral<T>>
-    inline void SerializeIntegral(SerializationEntity &serialized, T value)
-    {
-      std::get<ISerializeable::idStream>(serialized).write(reinterpret_cast<char *>(&value), sizeof(value));
-    };
-
-    inline void SerializeString(SerializationEntity &serialized, std::string value)
-    {
-      SerializeIntegral(serialized, value.length());
-      std::get<ISerializeable::idStream>(serialized).write(value.c_str(), value.length());
     }
 
-    template<class T = std::is_integral<T>>
-    inline void DeserializeIntegral(SerializationEntity &serialized, T &value)
+    protected:
+    template<class T>
+    inline void SerializeIntegral(SerializationEntity &serialized, T value) noexcept
     {
-      std::get<ISerializeable::idStream>(serialized).read(reinterpret_cast<char *>(&value), sizeof(value));
-    };
+      if (std::is_integral<T>::value == true)
+      {
+        try
+        {
+          std::get<idStream>(serialized).write(reinterpret_cast<char *>(&value), sizeof(value));
+        }
+        catch (std::exception)
+        {
+        }
+      }
+    }
 
-    inline void DeserializeString(SerializationEntity &serialized, std::string &value)
+    inline void ISerializeable::SerializeString(SerializationEntity &serialized, std::string value) noexcept
+    {
+      SerializeIntegral(serialized, value.length());
+
+      try
+      {
+        std::get<idStream>(serialized).write(value.c_str(), value.length());
+      }
+      catch (std::exception)
+      {
+      }
+    }
+
+    template<class T>
+    inline void DeserializeIntegral(SerializationEntity &serialized, T &value) noexcept
+    {
+      if (std::is_integral<T>::value == true)
+      {
+        try
+        {
+          std::get<idStream>(serialized).read(reinterpret_cast<char *>(&value), sizeof(value));
+        }
+        catch (std::exception)
+        {
+        }
+      }
+    }
+
+    inline void DeserializeString(SerializationEntity &serialized, std::string &value) noexcept
     {
       size_t length = 0;
       char c;
 
-      value.clear();
-
-      DeserializeIntegral(serialized, length);
-
-      while (length-- > 0)
+      try
       {
-        std::get<ISerializeable::idStream>(serialized).get(c);
-        value.push_back(c);
+        value.clear();
+
+        DeserializeIntegral(serialized, length);
+
+        while (length-- > 0)
+        {
+          std::get<idStream>(serialized).get(c);
+          value.push_back(c);
+        }
+      }
+      catch (std::exception)
+      {
       }
     }
   };

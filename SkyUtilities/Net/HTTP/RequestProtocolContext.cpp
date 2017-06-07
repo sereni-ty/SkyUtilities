@@ -5,9 +5,13 @@
 #include <exception>
 
 namespace SKU::Net::HTTP {
+  RequestProtocolContext::RequestProtocolContext()
+    : curl_handle(nullptr), curl_last_error(CURLE_OK), method(mNotSet)
+  {}
+
   RequestProtocolContext::~RequestProtocolContext()
   {
-    Cleanup();
+    // Cleanup();
   }
 
   void RequestProtocolContext::Initialize()

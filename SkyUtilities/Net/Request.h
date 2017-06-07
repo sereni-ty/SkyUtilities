@@ -29,7 +29,7 @@ namespace SKU::Net {
     };
 
     public:
-    Request(int pre_set_id = -1) noexcept;
+    explicit Request(int pre_set_id) noexcept;
     ~Request();
 
     public:
@@ -51,7 +51,6 @@ namespace SKU::Net {
     typename ProtocolContextType::Ptr GetProtocolContext();
 
     public:
-    void SetID(int id) noexcept;
     void SetState(State state) noexcept;
     void SetTimeout(unsigned ms) noexcept;
     void SetHandler(RequestEventHandler::Ptr handler);

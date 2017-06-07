@@ -15,7 +15,7 @@
 
 #define RESPONSE_MAX_SIZE 1024 * 256 // TODO: Configuration
 
-namespace SKU::Net::HTTP { // TODO: (protection) request creation frequency // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
+namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
   class RequestManager : public SKU::Net::RequestManagerBase, public ISerializeable
   {
     public:

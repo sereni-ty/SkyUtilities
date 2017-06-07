@@ -289,7 +289,7 @@ namespace SKU {
     net->Start();
   }
 
-  bool Plugin::IsActive()
+  bool Plugin::IsActive() noexcept
   {
     return is_game_ready && is_plugin_ready;
   }

@@ -8,6 +8,9 @@ namespace SKU::Net {
   class RequestManagerBase
   {
     public:
+    RequestManagerBase();
+
+    public:
     bool AddRequest(Request::Ptr request) noexcept;
     virtual void RemoveRequest(Request::Ptr request);
 

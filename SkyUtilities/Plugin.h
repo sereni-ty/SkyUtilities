@@ -66,7 +66,7 @@ namespace SKU {
     void OnPostLoadGame();
 
     public:
-    bool IsActive();
+    bool IsActive() noexcept;
 
     public:
     Net::Interface::Ptr &GetNetInterface();

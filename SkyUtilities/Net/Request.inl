@@ -9,7 +9,7 @@ Request::Ptr Request::Create(int pre_set_id)
     throw std::bad_exception();
   }
 
-  new_request->proto_ctx = std::make_shared<ProtocolContextType>();
+  new_request->proto_ctx = std::make_shared<ProtocolContextType>(); // TODO: read if it even returns a nullptr.. most likely throws a f.. an exception
 
   if (new_request->proto_ctx == nullptr)
   {

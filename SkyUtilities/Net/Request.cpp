@@ -60,14 +60,6 @@ namespace SKU::Net {
     return handler;
   }
 
-  void Request::SetID(int id) noexcept // TODO: check if it's still used
-  {
-    if (GLOBAL_REQUEST_ID_COUNTER < id)
-      GLOBAL_REQUEST_ID_COUNTER = id + 10;
-
-    this->id = id;
-  }
-
   void Request::SetState(State state) noexcept
   {
     this->state = state;

@@ -31,7 +31,12 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
     Plugin::GetInstance()->GetPapyrusEventManager()->Register(GetEventString(evHTTPRequestFinished));
     Plugin::GetInstance()->GetPapyrusEventManager()->Register(GetEventString(evModInfoRetrieval));
 
-    http_requestmanager = std::make_unique<HTTP::RequestManager>();
+    if (http_requestmanager == nullptr)
+    {
+      http_requestmanager = std::make_unique<HTTP::RequestManager>();
+    }
+
+    http_requestmanager->Start(); // in case there were requests loaded.
   }
 
   void Interface::Stop()
@@ -44,7 +49,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
     Plugin::GetInstance()->GetPapyrusEventManager()->Unregister(GetEventString(evHTTPRequestFinished));
 
     // request manager
-    this->http_requestmanager.reset();
+    this->http_requestmanager = std::make_unique<HTTP::RequestManager>();
 
     // internal state
     Plugin::Log(LOGL_VERBOSE, "Net: Stopped.");
@@ -76,9 +81,10 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
   }
 
   long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
-  {// TODO: check if scripts are paused, too..
+  {
+    // TODO: check if scripts are paused, too..
+    // TODO: own class for script call frequency check and blacklist..
     using namespace std::chrono;
-
     struct ScriptCallsTimeInformation
     {
       std::vector<steady_clock::time_point> last_known_calls;
@@ -153,7 +159,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
       request->SetTimeout(timeout);
       request->GetProtocolContext<HTTP::RequestProtocolContext>()->Initialize(method, url, body);
 
-      if (HTTP::LLabModInfoRequestEventHandler::TypeID < request_handler_type_id // TODO: Fix this whole TypeID mess.
+      if (HTTP::LLabModInfoRequestEventHandler::TypeID < request_handler_type_id
         || true == Plugin::GetInstance()->GetNetInterface()->http_requestmanager->AddRequest(request))
       {
         if (form != nullptr)
@@ -285,6 +291,8 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
   bool Interface::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
   {
+    http_requestmanager = std::make_unique<HTTP::RequestManager>();
+
     return http_requestmanager->IsRequestedSerialization(serialized);
   }
 

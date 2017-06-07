@@ -180,7 +180,10 @@ namespace SKU {
     Plugin::Log(LOGL_VERBOSE, "PapyrusEventManager: Adding recipient '%s' to event '%s'.",
       recipient->GetFullName(), event_name.c_str());
 
-    recipient_map.at(event_name).emplace(recipient_handle);
+    if (recipient_map.at(event_name).emplace(recipient_handle).second == true)
+    {
+      policy->AddRef(recipient_handle);
+    }
 
     return true;
   }
@@ -242,7 +245,7 @@ namespace SKU {
       return;
     }
 
-    if (std::get<ISerializeable::idStream>(serialized).tellg() == std::streampos(0))
+    if (std::get<ISerializeable::idStream>(serialized).tellp() == std::streampos(0))
     {
       Plugin::Log(LOGL_VERBOSE, "PapyrusEventManager: No events were registered.");
       return;
@@ -258,7 +261,7 @@ namespace SKU {
       DeserializeString(serialized, event_name);
       DeserializeIntegral(serialized, recipient_amount);
 
-      Plugin::Log(LOGL_DETAILED, "PapyrusEventManager: Setting up event '%d' with %d recipients",
+      Plugin::Log(LOGL_DETAILED, "PapyrusEventManager: Setting up event '%s' with %d recipients",
         event_name.c_str(), recipient_amount);
 
       if (recipient_amount > 0)
