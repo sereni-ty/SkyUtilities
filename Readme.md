@@ -5,11 +5,15 @@
 SkyUtilities is a SKSE plugin targeted to Skyrim mod authors. It adds features to Papyrus which yet don't exist and aren't available anywhere else. 
 This project is a way for me to get an understanding of SKSE and the the games internal funtionalites since I'd like to start working on Skyrim SE and Fallout 4 too, as soon as there is a release of their script extensions. I'll try to implement every feature written for Oldrim into SSE as to not make the plugin irrelevant in the future if SSE actually leaves Oldrim behind (modding-scene wise).
 
-There aren't much features at the moment but I'm getting there. Right now there are more or less fully working basic HTTP requests (bot GET and POST), URL en/decoding and the possibility to retrieve mod information from Nexus or LoversLab (via mod id). 
+### Features 
 
-Requests do not block. Responses are distributed via events. Events and requests alike are serializeable which basically means that open requests are saved into the SKSE save game and continued (as it should) after loading the save game.
+There aren't much features at the moment but I'm getting there. 
 
-For more information see **Future**.
++ (Basic) HTTP requests (bot GET and POST)
++ URL en/decoding 
++ Mod information retrieval from Nexus (non-adult) or LoversLab (via mod id).
+
+Requests do not block. Responses are distributed via events. Events and requests alike are serializeable which basically means that open requests (Requests not processed when the game is saved) are saved into the SKSE co-save and continued (as it should) after loading the save game.
 
 ### Future (or.. *I need features!*)
 
@@ -23,11 +27,12 @@ Thinking about:
 
 ### Requirements
 
-#### Libraries
+If you want to compile SkyUtilities on your own. 
+
+#### Libraries 
 
 + [SKSE][site_skse] (≥ *v1.9.32.0*)
 + [libCURL][site_curl] (≥ *7.54.0*)
-+ [boost][site_boost] (≥ *1.63.0*)
 
 #### Compiler
 
