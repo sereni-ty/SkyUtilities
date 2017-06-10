@@ -568,8 +568,7 @@ namespace SKU::Net::HTTP {
   {
     int unfinished_requests = 0;
 
-    int id;
-    uint32_t timeout, handler_type_id, method;
+    uint32_t id, timeout, handler_type_id, method;
     std::string url, body;
 
     if (IsRequestedSerialization(serialized) == false)

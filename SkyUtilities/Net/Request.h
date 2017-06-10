@@ -29,12 +29,12 @@ namespace SKU::Net {
     };
 
     public:
-    explicit Request(int pre_set_id) noexcept;
+    Request(uint32_t pre_set_id = 0);
     ~Request();
 
     public:
     template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
-    static Ptr Create(int pre_set_id = -1);
+    static Ptr Create(uint32_t pre_set_id = 0);
 
     public:
     void Stop();
@@ -42,9 +42,9 @@ namespace SKU::Net {
     void Cleanup();
 
     public:
-    int GetID() noexcept;
+    uint32_t GetID() noexcept;
     State GetState() noexcept;
-    unsigned GetTimeout() noexcept; // Timeout in ms
+    uint32_t GetTimeout() noexcept; // Timeout in ms
     RequestEventHandler::Ptr GetHandler();
 
     template< class ProtocolContextType = std::is_base_of<IRequestProtocolContext, ProtocolContextType> >
@@ -52,11 +52,11 @@ namespace SKU::Net {
 
     public:
     void SetState(State state) noexcept;
-    void SetTimeout(unsigned ms) noexcept;
+    void SetTimeout(uint32_t ms) noexcept;
     void SetHandler(RequestEventHandler::Ptr handler);
 
     private:
-    int id;
+    uint32_t id;
     State state;
     IRequestProtocolContext::Ptr proto_ctx;
     unsigned timeout;

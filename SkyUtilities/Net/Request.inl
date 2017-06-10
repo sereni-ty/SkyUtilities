@@ -1,5 +1,5 @@
 template<class ProtocolContextType>
-Request::Ptr Request::Create(int pre_set_id)
+Request::Ptr Request::Create(uint32_t pre_set_id)
 {
   Ptr new_request = std::make_shared<Request>(pre_set_id);
 
