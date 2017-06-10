@@ -513,7 +513,7 @@ namespace SKU::Net::HTTP {
   void RequestManager::Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities)
   {
     SerializationEntity serialized;
-    uint32_t unfinished_requests;
+    uint32_t unfinished_requests, serialized_requests = 0;
 
     std::get<ISerializeable::idType>(serialized) = PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE;
     std::get<ISerializeable::idVersion>(serialized) = PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION;
@@ -551,14 +551,21 @@ namespace SKU::Net::HTTP {
         break;
       }
 
-      unfinished_requests--;
+      serialized_requests++;
     }
 
-    if (unfinished_requests != 0) // TODO: handle that
+    // didn't write the expected amount of `unfinished_requests` requests
+    if (unfinished_requests != serialized_requests)
     {
-      Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Reverting due to unmatched request count.");
-      // for now: revert.
-      std::get<ISerializeable::idStream>(serialized).str("");
+      auto current_position = std::get<ISerializeable::idStream>(serialized).tellp();
+      std::get<ISerializeable::idStream>(serialized).seekp(std::streampos(0));
+
+      SerializeIntegral(serialized, serialized_requests);
+
+      std::get<ISerializeable::idStream>(serialized).seekp(current_position);
+
+      Plugin::Log(LOGL_WARNING, "(HTTP) RequestManager: Corrected written requests count. %d instead of %d requests (expectation) saved..",
+        serialized_requests, unfinished_requests);
     }
 
     serialized_entities.push(std::move(serialized));
