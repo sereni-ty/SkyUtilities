@@ -5,6 +5,7 @@
 
 #include "Net/NetInterface.h"
 #include "PapyrusEventManager.h"
+#include "Configuration.h"
 
 #include <set>
 
@@ -33,6 +34,8 @@ enum
 #define PLUGIN_VERSION ((PLUGIN_RELEASE_VERSION_MAJOR & 0xFF) << 24) | (PLUGIN_RELEASE_VERSION_MINOR & 0xFFFFFF)
 
 #define PLUGIN_NAME "SkyUtilities"
+
+#define PLUGIN_CONF_NAME PLUGIN_NAME ".conf"
 
 #define PLUGIN_RELATIVE_SAVES_PATH "\\My Games\\Skyrim\\Saves\\"
 #define PLUGIN_RELATIVE_LOG_PATH "\\My Games\\Skyrim\\SKSE\\" PLUGIN_NAME ".log"
@@ -71,16 +74,15 @@ namespace SKU {
     public:
     Net::Interface::Ptr &GetNetInterface();
     PapyrusEventManager::Ptr &GetPapyrusEventManager();
+    Configuration::Ptr &GetConfiguration();
 
     public:
-    static void Log(unsigned int level, const char *fmt, ...);
-
-    private:
-    //static std::unordered_map<std::string, std::string> Configuration();
+    static void Log(int level, const char *fmt, ...);
 
     private:
     Net::Interface::Ptr net;
     PapyrusEventManager::Ptr papyrus_event_manager;
+    Configuration::Ptr conf;
 
     bool is_plugin_ready;
     bool is_game_ready;

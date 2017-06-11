@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Configuration.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="Lockable.h" />
     <ClInclude Include="Net\HTTP\BasicRequestEventHandler.h" />
@@ -46,6 +47,7 @@
     <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp" />
     <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp" />
     <ClCompile Include="PapyrusEvent.cpp" />
@@ -67,6 +69,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Configuration.inl" />
     <None Include="Net\Request.inl" />
     <None Include="Papyrus Exports\SKUNet.psc" />
   </ItemGroup>

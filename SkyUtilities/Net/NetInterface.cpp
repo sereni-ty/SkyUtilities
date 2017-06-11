@@ -17,9 +17,15 @@
 #include <chrono>
 #include <vector>
 
-namespace SKU::Net { // TODO: Consider writing class with control management (Start, Stop, ..), e.g. InterfaceBase (Start, Stop, Initialize)
+namespace SKU::Net {
   Interface::Interface()
-  {}
+  {
+    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyLimitPerTimeframe", 100);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyLimitExceedings", 3);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyTimeframe", 1000);
+
+    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.Requests.DefaultTimeout", 2500);
+  }
 
   Interface::~Interface()
   {}

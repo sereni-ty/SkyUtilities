@@ -21,7 +21,7 @@
 #include <mutex>
 #include <list>
 
-// TODO: might need a configuration file (net: requests per seconds, max response size)
+// TODO: Implement Configuration (See various header for the `Configuration` TODO)
 
 namespace SKU {
   Plugin::Plugin()
@@ -300,8 +300,17 @@ namespace SKU {
     return papyrus_event_manager;
   }
 
-  inline
-    void Plugin::Log(unsigned int level, const char *fmt, ...)
+  Configuration::Ptr &Plugin::GetConfiguration()
+  {
+    if (conf == nullptr)
+    {
+      conf = std::make_unique<Configuration>(PLUGIN_CONF_NAME);
+    }
+
+    return conf;
+  }
+
+  inline void Plugin::Log(int level, const char *fmt, ...)
   {
     static std::mutex mtx;
 

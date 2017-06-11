@@ -2,7 +2,7 @@
 #include "Net/Request.h"
 #include "Net/RequestEventHandler.h"
 
-namespace SKU::Net::HTTP { // TODO: Add failure boolean value to event
+namespace SKU::Net::HTTP {
   class NexusModInfoRequestEventHandler : public RequestEventHandler
   {
     REQUEST_EVENT_HANDLER_DEF('NMRH')

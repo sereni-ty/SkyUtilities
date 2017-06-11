@@ -68,6 +68,9 @@
     <ClInclude Include="PapyrusEventManager.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>Internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />
@@ -101,6 +104,9 @@
     <ClCompile Include="PapyrusEventManager.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="Configuration.cpp">
+      <Filter>Internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Papyrus Exports\SKUNet.psc">
@@ -108,6 +114,9 @@
     </None>
     <None Include="Net\Request.inl">
       <Filter>Net</Filter>
+    </None>
+    <None Include="Configuration.inl">
+      <Filter>Internal</Filter>
     </None>
   </ItemGroup>
 </Project>

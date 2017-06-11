@@ -14,6 +14,8 @@ namespace SKU::Net::HTTP {
   RequestManager::RequestManager()
     : should_run(false), curl_handle(nullptr)
   {
+    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.Requests.HTTP.MaxResponseSize", 256 * 1024);
+
     Initialize();
   }
 
