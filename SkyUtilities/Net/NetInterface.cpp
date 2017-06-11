@@ -72,12 +72,12 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
 
   long Interface::GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
   {
-    return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)) + "/?", "", 25000); // TODO: add default timeout
+    return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)) + "/?", "", REQUESTS_DEFAULT_TIMEOUT);
   }
 
   long Interface::GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
   {
-    return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", 25000); // TODO: add default timeout
+    return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", REQUESTS_DEFAULT_TIMEOUT);
   }
 
   long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
