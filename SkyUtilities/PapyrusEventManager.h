@@ -62,7 +62,7 @@ namespace SKU {
     public:
     virtual void Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities) final;
     virtual void Deserialize(ISerializeable::SerializationEntity &serialized) final;
-    virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
+    virtual bool IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized) final;
 
     private:
     using RecipientMap = std::unordered_map</* event name: */std::string, std::unordered_set< PapyrusEventRecipient > >; // TODO: turn around.. makes more sense

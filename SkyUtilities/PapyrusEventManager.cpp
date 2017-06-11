@@ -284,7 +284,7 @@ namespace SKU {
     }
   }
 
-  bool PapyrusEventManager::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
+  bool PapyrusEventManager::IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized)
   {
     if (std::get<ISerializeable::idType>(serialized) != PLUGIN_PAPYRUS_EVENTS_SERIALIZATION_TYPE)
     {

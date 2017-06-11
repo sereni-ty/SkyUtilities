@@ -652,7 +652,7 @@ namespace SKU::Net::HTTP {
     }
   }
 
-  bool RequestManager::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
+  bool RequestManager::IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized)
   {
     if (std::get<ISerializeable::idType>(serialized) != PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE)
     {

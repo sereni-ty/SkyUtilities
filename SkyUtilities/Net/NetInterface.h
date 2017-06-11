@@ -57,7 +57,7 @@ namespace SKU::Net {
     public:
     virtual void Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities) final;
     virtual void Deserialize(ISerializeable::SerializationEntity &serialized) final;
-    virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
+    virtual bool IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized) final;
 
     public:
     enum PapyrusEvent

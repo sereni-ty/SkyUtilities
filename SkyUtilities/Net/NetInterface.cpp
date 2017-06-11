@@ -289,7 +289,7 @@ namespace SKU::Net { // TODO: Consider writing class with control management (St
     http_requestmanager->Deserialize(serialized);
   }
 
-  bool Interface::IsRequestedSerialization(ISerializeable::SerializationEntity &serialized)
+  bool Interface::IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized)
   {
     http_requestmanager = std::make_unique<HTTP::RequestManager>();
 

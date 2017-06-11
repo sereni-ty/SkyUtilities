@@ -59,7 +59,7 @@ namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. mov
     public:
     virtual void Serialize(std::stack<ISerializeable::SerializationEntity> &serialized_entities) final;
     virtual void Deserialize(ISerializeable::SerializationEntity &serialized) final;
-    virtual bool IsRequestedSerialization(ISerializeable::SerializationEntity &serialized) final;
+    virtual bool IsRequestedSerialization(const ISerializeable::SerializationEntity &serialized) final;
 
     private:
     bool should_run;

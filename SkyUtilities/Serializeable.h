@@ -26,7 +26,7 @@ namespace SKU {
     virtual void Deserialize(SerializationEntity &serialized) = 0;
 
     public:
-    virtual bool IsRequestedSerialization(SerializationEntity &serialized)
+    virtual bool IsRequestedSerialization(const SerializationEntity &serialized)
     {
       return false;
     }
