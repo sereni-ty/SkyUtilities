@@ -1,10 +1,11 @@
 template<typename T>
-bool Configuration::Get(const std::string &key, T &value)
+bool Configuration::Get(const std::string &key, T &value, const T &default_value)
 {
   auto entry_it = entries.find(key);
 
   if (entry_it == entries.end())
   {
+    value = default_value;
     return false;
   }
 
@@ -13,9 +14,9 @@ bool Configuration::Get(const std::string &key, T &value)
 }
 
 template<typename T>
-bool Configuration::Get(const std::string &key, T &value, std::function<T(const T&)> value_limits_check)
+bool Configuration::Get(const std::string &key, T &value, std::function<T(const T&)> value_limits_check, const T &default_value)
 {
-  if (Get(key, value) == false)
+  if (Get(key, value, default_value) == false)
   {
     return false;
   }
@@ -44,10 +45,5 @@ void Configuration::SetInitial(const std::string &key, const T &value)
     return;
   }
 
-  std::stringstream ss;
-  ss << value;
-
-  entries.try_emplace(key, std::move(ss));
-
-  Save();
+  Set(key, value);
 }

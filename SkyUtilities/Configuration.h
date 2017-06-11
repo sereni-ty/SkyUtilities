@@ -24,10 +24,10 @@ namespace SKU {
 
     public:
     template<typename T>
-    bool Get(const std::string &key, T &value); // TODO: default value
+    bool Get(const std::string &key, T &value, const T &default_value = T());
 
     template<typename T>
-    bool Get(const std::string &key, T &value, std::function<T(const T&)> value_limits_check); // TODO: default value
+    bool Get(const std::string &key, T &value, std::function<T(const T&)> value_limits_check, const T &default_value = T());
 
     template<typename T>
     void Set(const std::string &key, const T &value);

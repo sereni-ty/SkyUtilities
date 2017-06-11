@@ -28,7 +28,7 @@ namespace SKU {
 
     Plugin::Log(LOGL_VERBOSE, "Configuration: Loading..");
 
-    while (std::getline(confs, line).eof() == false)
+    while (std::getline(confs, line).eof() == false) // <--- Won't leave this loop.
     {
       std::string key;
       std::stringstream value;
