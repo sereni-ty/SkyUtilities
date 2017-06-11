@@ -158,7 +158,7 @@ namespace SKU {
   }
 
   bool PapyrusEventManager::AddRecipient(const std::string &event_name, TESForm *recipient)
-  {// TODO: Serialize policy handle?
+  {
     VMClassRegistry *registry = (*g_skyrimVM)->GetClassRegistry();
     IObjectHandlePolicy *policy = registry->GetHandlePolicy();
 
