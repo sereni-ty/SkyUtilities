@@ -7,7 +7,6 @@
 #include <memory>
 
 // TODO: JSON
-// TODO: consider writing a ConfigurationSetting class
 namespace SKU {
   class Configuration
   {
