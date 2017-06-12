@@ -21,8 +21,6 @@
 #include <mutex>
 #include <list>
 
-// TODO: Implement Configuration (See various header for the `Configuration` TODO)
-
 namespace SKU {
   Plugin::Plugin()
     : is_game_ready(false), is_plugin_ready(false)

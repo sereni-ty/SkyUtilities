@@ -16,7 +16,7 @@ namespace SKU {
     Save();
   }
 
-  void Configuration::Load() // TODO: doesn't work properly..
+  void Configuration::Load()
   {
     std::ifstream confs(path);
     std::string line;
@@ -28,7 +28,7 @@ namespace SKU {
 
     Plugin::Log(LOGL_VERBOSE, "Configuration: Loading..");
 
-    while (std::getline(confs, line).eof() == false || confs.rdbuf()->in_avail() > 0) // <--- Won't leave this loop.
+    while (std::getline(confs, line).eof() == false || confs.rdbuf()->in_avail() > 0)
     {
       std::string key;
       std::stringstream value;

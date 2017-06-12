@@ -182,8 +182,6 @@ namespace SKU::Net {
       conf->Get<uint32_t>(Config::PapyrusCallsPerTimeFrame, calls_per_timeframe);
       conf->Get<uint32_t>(Config::PapyrusMaxTransgressions, max_transgressions);
 
-      Plugin::Log(LOGL_VERBOSE, "Net: Loaded Configuration Values (%d %d %d)", timeframe, calls_per_timeframe, max_transgressions); // TODO: remove this one
-
       if (info.last_known_calls.size() == calls_per_timeframe)
       {
         while (duration_cast<milliseconds>(current_time - info.last_known_calls.back()).count() < timeframe)

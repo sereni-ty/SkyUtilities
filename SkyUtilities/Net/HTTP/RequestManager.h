@@ -14,8 +14,6 @@
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE MACRO_SWAP32('RMSU')
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION 1
 
-#define RESPONSE_MAX_SIZE 1024 * 256 // TODO: Configuration
-
 namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
   namespace Config {
     extern Configuration::Setting<uint32_t> HTTPMaxResponseSize;
