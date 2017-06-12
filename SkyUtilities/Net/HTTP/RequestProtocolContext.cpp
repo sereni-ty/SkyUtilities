@@ -40,7 +40,8 @@ namespace SKU::Net::HTTP {
     this->body = body;
     this->method = method;
 
-    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestProtocolContext: Request (id: %d) URL=\"%s\"", GetOwner()->GetID(), url.c_str());
+    Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestProtocolContext: Request (id: %d) URL=\"%s\", Timeout=%dms",
+      GetOwner()->GetID(), url.c_str(), GetOwner()->GetTimeout());
   }
 
   void RequestProtocolContext::Cleanup()

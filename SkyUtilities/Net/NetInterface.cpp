@@ -17,14 +17,51 @@
 #include <chrono>
 #include <vector>
 
+namespace SKU::Net::Config {
+  Configuration::Setting<uint32_t> PapyrusCallsPerTimeFrame(
+    std::string("Net.Papyrus.CallsPerTimeFrame"),
+    100,
+    [] (const uint32_t &value) -> uint32_t
+  {
+    return value > 100 ? 100 : value;
+  }
+  );
+
+  Configuration::Setting<uint32_t> PapyrusMaxTransgressions(
+    std::string("Net.Papyrus.MaxTransgressions"),
+    3,
+    [] (const uint32_t &value) -> uint32_t
+  {
+    return value > 3 ? 3 : value;
+  }
+  );
+
+  Configuration::Setting<uint32_t> PapyrusTimeFrame(
+    std::string("Net.Papyrus.TimeFrame"),
+    1000,
+    [] (const uint32_t &value) -> uint32_t
+  {
+    return value > 1000 ? 1000 : value;
+  }
+  );
+
+  Configuration::Setting<long> RequestsDefaultTimeout(
+    std::string("Net.Requests.DefaultTimeout"),
+    2500,
+    [] (const long &value) -> long
+  {
+    return value > 2500 || value <= 0 ? 2500 : value;
+  }
+  );
+}
+
 namespace SKU::Net {
   Interface::Interface()
   {
-    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyLimitPerTimeframe", 100);
-    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyLimitExceedings", 3);
-    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.CallFrequencyTimeframe", 1000);
-
-    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.Requests.DefaultTimeout", 2500);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusCallsPerTimeFrame);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusMaxTransgressions);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusTimeFrame);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<long>(Config::RequestsDefaultTimeout);
   }
 
   Interface::~Interface()
@@ -78,16 +115,37 @@ namespace SKU::Net {
 
   long Interface::GetNexusModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
   {
-    return Interface::HTTPRequest(HTTP::NexusModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)) + "/?", "", REQUESTS_DEFAULT_TIMEOUT);
+    return Interface::HTTPRequest(
+      HTTP::NexusModInfoRequestEventHandler::TypeID,
+      form,
+      HTTP::RequestProtocolContext::mGET,
+      std::string("www.nexusmods.com/skyrim/mods/" + std::string(mod_id.data)) + "/?",
+      "",
+      -1
+    );
   }
 
   long Interface::GetLLabModInfo(StaticFunctionTag*, TESForm *form, BSFixedString mod_id)
   {
-    return Interface::HTTPRequest(HTTP::LLabModInfoRequestEventHandler::TypeID, form, HTTP::RequestProtocolContext::mGET, std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-", "", REQUESTS_DEFAULT_TIMEOUT);
+    return Interface::HTTPRequest(
+      HTTP::LLabModInfoRequestEventHandler::TypeID,
+      form,
+      HTTP::RequestProtocolContext::mGET,
+      std::string("www.loverslab.com/files/file/" + std::string(mod_id.data)) + "-",
+      "",
+      -1
+    );
   }
 
   long Interface::HTTPRequest(uint32_t request_handler_type_id, TESForm *form, HTTP::RequestProtocolContext::Method method, std::string url, std::string body, long timeout)
   {
+    Configuration::Ptr &conf = Plugin::GetInstance()->GetConfiguration();
+
+    if (timeout != Config::RequestsDefaultTimeout(timeout))
+    {
+      conf->Get<long>(Config::RequestsDefaultTimeout, timeout);
+    }
+
     // TODO: check if scripts are paused, too..
     // TODO: own class for script call frequency check and blacklist..
     using namespace std::chrono;
@@ -118,19 +176,27 @@ namespace SKU::Net {
       ScriptCallsTimeInformation &info = script_calls.at(form);
       info.last_known_calls.push_back(current_time);
 
-      if (info.last_known_calls.size() == REQUESTS_LIMIT_PER_TIMEFRAME)
+      uint32_t timeframe, calls_per_timeframe, max_transgressions;
+
+      conf->Get<uint32_t>(Config::PapyrusTimeFrame, timeframe);
+      conf->Get<uint32_t>(Config::PapyrusCallsPerTimeFrame, calls_per_timeframe);
+      conf->Get<uint32_t>(Config::PapyrusMaxTransgressions, max_transgressions);
+
+      Plugin::Log(LOGL_VERBOSE, "Net: Loaded Configuration Values (%d %d %d)", timeframe, calls_per_timeframe, max_transgressions); // TODO: remove this one
+
+      if (info.last_known_calls.size() == calls_per_timeframe)
       {
-        while (duration_cast<milliseconds>(current_time - info.last_known_calls.back()).count() < REQUESTS_LIMIT_TIMEFRAME)
+        while (duration_cast<milliseconds>(current_time - info.last_known_calls.back()).count() < timeframe)
         {
           info.last_known_calls.pop_back();
         }
 
         if (info.last_known_calls.size() == 0)
         {
-          if (++info.limit_exceeding_count <= REQUESTS_LIMIT_EXCEEDINGS_PERMITTED)
+          if (++info.limit_exceeding_count <= max_transgressions)
           {
             Plugin::Log(LOGL_INFO, "Net: A specific script exceeded the request limit of %d in a time frame of %dms. Limit exceeded %d times.",
-              REQUESTS_LIMIT_PER_TIMEFRAME, REQUESTS_LIMIT_TIMEFRAME, info.limit_exceeding_count);
+              calls_per_timeframe, timeframe, info.limit_exceeding_count);
           }
           else
           {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Serializeable.h"
+#include "Configuration.h"
 
 #include "Net/RequestManagerBase.h"
 
@@ -16,6 +17,10 @@
 #define RESPONSE_MAX_SIZE 1024 * 256 // TODO: Configuration
 
 namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
+  namespace Config {
+    extern Configuration::Setting<uint32_t> HTTPMaxResponseSize;
+  }
+
   class RequestManager : public SKU::Net::RequestManagerBase, public ISerializeable
   {
     public:

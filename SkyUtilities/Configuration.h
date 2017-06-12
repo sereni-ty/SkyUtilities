@@ -6,9 +6,29 @@
 #include <functional>
 #include <memory>
 
+// TODO: JSON
+// TODO: consider writing a ConfigurationSetting class
 namespace SKU {
   class Configuration
   {
+    public:
+    template<class T>
+    struct Setting
+    {
+      Setting(const std::string &key, const T &default_value, std::function<T(const T&)> value_limits_check)
+        : key(key), default_value(default_value), value_limits_check(value_limits_check)
+      {}
+
+      T operator ()(const T &value)
+      {
+        return value_limits_check(value);
+      }
+
+      std::string key;
+      T default_value;
+      std::function<T(const T&)> value_limits_check;
+    };
+
     public:
     using Ptr = std::unique_ptr<Configuration>;
 
@@ -18,22 +38,19 @@ namespace SKU {
 
     private:
     void Load();
-    bool ParseLine(const std::string &line, std::string &key, std::stringstream &value);
+    static bool ParseLine(const std::string &line, std::string &key, std::stringstream &value);
 
     void Save();
 
     public:
     template<typename T>
-    bool Get(const std::string &key, T &value, const T &default_value = T());
+    bool Get(const Setting<T> &setting, T &value);
 
     template<typename T>
-    bool Get(const std::string &key, T &value, std::function<T(const T&)> value_limits_check, const T &default_value = T());
+    void Set(const Setting<T> &setting, const T &value);
 
     template<typename T>
-    void Set(const std::string &key, const T &value);
-
-    template<typename T>
-    void SetInitial(const std::string &key, const T &value);
+    void SetInitial(const Setting<T> &setting);
 
     private:
     std::unordered_map<std::string /* key */, std::stringstream /* value */> entries;

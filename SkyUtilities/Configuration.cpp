@@ -28,7 +28,7 @@ namespace SKU {
 
     Plugin::Log(LOGL_VERBOSE, "Configuration: Loading..");
 
-    while (std::getline(confs, line).eof() == false) // <--- Won't leave this loop.
+    while (std::getline(confs, line).eof() == false || confs.rdbuf()->in_avail() > 0) // <--- Won't leave this loop.
     {
       std::string key;
       std::stringstream value;
@@ -58,12 +58,19 @@ namespace SKU {
       return false;
     }
 
-    value = std::stringstream(splitter.str().substr(splitter.tellg()));
-
-    while (value.str().empty() == false && std::isspace(value.str().front()))
+    if (splitter.tellg() == std::streampos(splitter.str().length()))
     {
-      value.str().erase(0);
+      return false;
     }
+
+    tmp = splitter.str().substr(splitter.tellg());
+
+    if (tmp.length() > 0)
+    {
+      tmp = tmp.substr(tmp.find_first_not_of(' '));
+    }
+
+    value = std::stringstream(tmp);
 
     return true;
   }

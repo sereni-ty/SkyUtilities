@@ -10,11 +10,19 @@
 
 #include <mutex>
 
+namespace SKU::Net::HTTP::Config {
+  Configuration::Setting<uint32_t> HTTPMaxResponseSize(
+    std::string("Net.Requests.HTTP.MaxResponseSize"),
+    1024 * 256,
+    [](auto &value) -> auto {return value > 1024 * 256 ? 1024 * 256 : value; }
+  );
+}
+
 namespace SKU::Net::HTTP {
   RequestManager::RequestManager()
     : should_run(false), curl_handle(nullptr)
   {
-    Plugin::GetInstance()->GetConfiguration()->SetInitial("Net.Requests.HTTP.MaxResponseSize", 256 * 1024);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::HTTPMaxResponseSize);
 
     Initialize();
   }
