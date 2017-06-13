@@ -33,6 +33,7 @@ If you want to compile SkyUtilities on your own.
 
 + [SKSE][site_skse] (≥ *v1.9.32.0*)
 + [libCURL][site_curl] (≥ *7.54.0*)
++ [boost][site_boost] (≥ *1.63.0*)
 
 #### Compiler
 
