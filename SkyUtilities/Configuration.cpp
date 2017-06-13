@@ -18,7 +18,6 @@ namespace SKU {
 
   void Configuration::Load()
   {
-    std::string line;
     std::ifstream confs(path);
 
     if (confs.is_open() == false)
