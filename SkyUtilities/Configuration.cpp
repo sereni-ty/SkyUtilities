@@ -2,7 +2,7 @@
 #include "Plugin.h"
 
 #include <fstream>
-#include <cctype>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace SKU {
   Configuration::Configuration(const std::string &path)
@@ -18,98 +18,58 @@ namespace SKU {
 
   void Configuration::Load()
   {
-    std::ifstream confs(path);
     std::string line;
+    std::ifstream confs(path);
 
     if (confs.is_open() == false)
     {
       return;
     }
 
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Loading..");
+    Plugin::Log(LOGL_VERBOSE, "Configuration: Loading (%s)..", path.c_str());
 
-    while (std::getline(confs, line).eof() == false || confs.rdbuf()->in_avail() > 0)
+    try
     {
-      std::string key;
-      std::stringstream value;
-
-      if (ParseLine(line, key, value) == true)
-      {
-        Plugin::Log(LOGL_VERBOSE, "Configuration: Loaded '%s' = '%s'",
-          key.c_str(), value.str().c_str());
-
-        entries.try_emplace(key, std::move(value));
-      }
+      boost::property_tree::read_json(confs, json_values);
+    }
+    catch (boost::property_tree::json_parser_error &e)
+    {
+      Plugin::Log(LOGL_VERBOSE, "Configuration: Failed parsing (%s)", e.what());
     }
 
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Ready.");
-  }
-
-  bool Configuration::ParseLine(const std::string &line, std::string &key, std::stringstream &value)
-  {
-    std::stringstream splitter(line);
-    std::string tmp;
-
-    splitter >> key;
-    splitter >> tmp;
-
-    if (tmp != "=")
-    {
-      return false;
-    }
-
-    if (splitter.tellg() == std::streampos(splitter.str().length()))
-    {
-      return false;
-    }
-
-    tmp = splitter.str().substr(splitter.tellg());
-
-    if (tmp.length() > 0)
-    {
-      tmp = tmp.substr(tmp.find_first_not_of(' '));
-    }
-
-    value = std::stringstream(tmp);
-
-    return true;
+    Plugin::Log(LOGL_VERBOSE, "Configuration: Ready (%d).", json_values.size());
   }
 
   void Configuration::Save()
   {
-    if (entries.empty() == true || path.empty() == true)
+    Plugin::Log(LOGL_VERBOSE, "Configuration: Attempting to save (%s).", path.c_str());
+
+    if (json_values.empty() == true)
     {
       return;
     }
 
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Saving..");
+    if (path.empty() == true)
+    {
+      Plugin::Log(LOGL_VERBOSE, "Configuration: Invalid path. Unable to save.");
+      return;
+    }
 
     std::ofstream confs(path);
 
     if (confs.is_open() == false)
     {
-      Plugin::Log(LOGL_INFO, "Configuration: Couldn't save configuration file.");
+      Plugin::Log(LOGL_VERBOSE, "Configuration: Couldn't open configuration file to save data.");
       return;
     }
 
-    size_t longest_key_length = 0;
-
-    for (auto &entry : entries)
+    try
     {
-      longest_key_length = std::max<size_t>(entry.first.length(), longest_key_length);
+      boost::property_tree::write_json(confs, json_values);
     }
-
-    for (auto &entry : entries)
+    catch (boost::property_tree::json_parser_error &e)
     {
-      confs.width(longest_key_length + 1); // to maximize readability
-      confs << std::left << entry.first;
-
-      confs.width(1);
-      confs << "= ";
-      confs << entry.second.str();
-      confs << std::endl;
+      Plugin::Log(LOGL_VERBOSE, "Configuration: Failed writing configuration  (%s).", e.what());
     }
-
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Done.");
   }
 }

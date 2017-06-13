@@ -505,10 +505,14 @@ namespace SKU::Net::HTTP {
     RequestProtocolContext::Ptr ctx = request->GetProtocolContext<RequestProtocolContext>();
     size_t new_size = nmemb*size + ctx->response.size();
 
-    if (new_size > RESPONSE_MAX_SIZE)
+    uint32_t max_response_size;
+
+    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(Config::HTTPMaxResponseSize, max_response_size);
+
+    if (new_size > max_response_size)
     {
       Plugin::Log(LOGL_VERBOSE, "(HTTP) RequestManager: Request (id: %d) exceeded response limit (%dKB). Stopping request.",
-        request->GetID(), RESPONSE_MAX_SIZE / 1024);
+        request->GetID(), max_response_size / 1024);
 
       request->SetState(Request::sFailed);
       return -1; // Will appear as info message in CheckPendingRequests()

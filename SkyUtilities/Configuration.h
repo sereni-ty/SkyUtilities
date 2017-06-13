@@ -1,12 +1,11 @@
 #pragma once
 
 #include <string>
-#include <sstream>
-#include <unordered_map>
 #include <functional>
 #include <memory>
 
-// TODO: JSON
+#include <boost/property_tree/ptree.hpp>
+
 namespace SKU {
   class Configuration
   {
@@ -37,7 +36,6 @@ namespace SKU {
 
     private:
     void Load();
-    static bool ParseLine(const std::string &line, std::string &key, std::stringstream &value);
 
     void Save();
 
@@ -52,7 +50,7 @@ namespace SKU {
     void SetInitial(const Setting<T> &setting);
 
     private:
-    std::unordered_map<std::string /* key */, std::stringstream /* value */> entries;
+    boost::property_tree::ptree json_values;
     std::string path;
   };
 
