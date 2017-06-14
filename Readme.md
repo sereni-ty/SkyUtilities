@@ -12,6 +12,7 @@ There aren't much features at the moment but I'm getting there.
 + (Basic) HTTP requests (both GET and POST)
 + URL en/decoding 
 + Mod information retrieval from Nexus (non-adult) or LoversLab (via mod id).
++ Steam User Profile ID acquiral
 
 Requests do not block. Responses are distributed via events. Events and requests alike are serializeable which basically means that open requests (Requests not processed when the game is saved) are saved into the SKSE co-save and continued (as it should) after loading the save game.
 
@@ -33,7 +34,8 @@ If you want to compile SkyUtilities on your own.
 
 + [SKSE][site_skse] (≥ *v1.9.32.0*)
 + [libCURL][site_curl] (≥ *7.54.0*)
-+ [boost][site_boost] (≥ *1.63.0*)
++ [boost][site_boost] (≥ *1.63.0*) (Header only)
++ [Steamworks][site_steamworks] (≥ *140*) (Header only)
 
 #### Compiler
 
@@ -42,5 +44,6 @@ A compiler with partial C++17 feature implementation (std::any, nested namespace
 [site_skse]: http://skse.silverlock.org
 [site_curl]: https://curl.haxx.se/
 [site_boost]: http://www.boost.org
+[site_steamworks]: https://partner.steamgames.com/home
 [repo_future_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/Future.md#thoughts
 [repo_examples_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/Examples.md
