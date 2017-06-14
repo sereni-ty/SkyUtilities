@@ -13,6 +13,8 @@ There aren't much features at the moment but I'm getting there.
 + URL en/decoding 
 + Mod information retrieval from Nexus (non-adult) or LoversLab (via mod id).
 + Steam User Profile ID acquiral
++ Configuration (Readable: JSON) 
+  + With restrictions so as to not abuse this plugin
 
 Requests do not block. Responses are distributed via events. Events and requests alike are serializeable which basically means that open requests (Requests not processed when the game is saved) are saved into the SKSE co-save and continued (as it should) after loading the save game.
 
