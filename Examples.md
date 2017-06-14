@@ -1,5 +1,15 @@
 # Examples 
 
+## SteamAPI
+
+### Logging the Steam User Profile ID of the currently logged in user
+
+```papyrus
+event OnInit()
+  Debug.Trace("Steam Profile ID: " + SKUSteam.CurrentSteamUserProfileID())
+endEvent
+```
+
 ## Net
 
 ### Mod Information Retrieval (using HTTP GET Requests)
