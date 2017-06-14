@@ -1,5 +1,32 @@
 # Examples 
 
+## Configuration File 
+(as of https://github.com/sereni-ty/SkyUtilities/commit/c0424877aa09038f27f62e38aede408d9cf07bee)
+
+```json
+{
+    "Net": {
+        "Papyrus": {
+            "CallsPerTimeFrame": "100",
+            "MaxTransgressions": "3",
+            "TimeFrame": "1000"
+        },
+        "Requests": {
+            "DefaultTimeout": "2500",
+            "HTTP": {
+                "MaxResponseSize": "262144"
+            }
+        }
+    },
+    "SteamAPI": {
+        "Enabled": "true"
+    }
+}
+```
+
+This configuration file is automatically created on the first startup of a new game and is therefore filled with default values. SkyUtilites does not change any of these values. 
+You can customize the values to your liking, though you can't go above these values as they're not only default values but also hard caps.
+
 ## SteamAPI
 
 ### Logging the Steam User Profile ID of the currently logged in user
