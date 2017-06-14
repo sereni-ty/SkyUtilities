@@ -33,7 +33,11 @@ You can customize the values to your liking, though you can't go above these val
 
 ```papyrus
 event OnInit()
-  Debug.Trace("Steam Profile ID: " + SKUSteam.CurrentSteamUserProfileID())
+  string profile_id = SKUSteam.CurrentSteamUserProfileID()
+
+  if profile_id != ""
+    Debug.Trace("Steam Profile ID: " + profile_id)
+  endif
 endEvent
 ```
 
