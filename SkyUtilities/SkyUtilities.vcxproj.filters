@@ -17,6 +17,9 @@
     <Filter Include="Events">
       <UniqueIdentifier>{5c432e7c-fcf0-47f9-a8ce-4130aa3c8b05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Steam">
+      <UniqueIdentifier>{26158a41-f1fd-45a1-af96-aa2cb33c8705}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Singleton.h">
@@ -71,6 +74,12 @@
     <ClInclude Include="Configuration.h">
       <Filter>Internal</Filter>
     </ClInclude>
+    <ClInclude Include="Steam\SteamInterface.h">
+      <Filter>Steam</Filter>
+    </ClInclude>
+    <ClInclude Include="Steam\SteamAPI.h">
+      <Filter>Steam</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />
@@ -107,6 +116,12 @@
     <ClCompile Include="Configuration.cpp">
       <Filter>Internal</Filter>
     </ClCompile>
+    <ClCompile Include="Steam\SteamAPI.cpp">
+      <Filter>Steam</Filter>
+    </ClCompile>
+    <ClCompile Include="Steam\SteamInterface.cpp">
+      <Filter>Steam</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Papyrus Exports\SKUNet.psc">
@@ -117,6 +132,9 @@
     </None>
     <None Include="Configuration.inl">
       <Filter>Internal</Filter>
+    </None>
+    <None Include="Papyrus Exports\SKUSteam.psc">
+      <Filter>Papyrus Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>

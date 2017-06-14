@@ -45,6 +45,8 @@
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Serializeable.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Steam\SteamAPI.h" />
+    <ClInclude Include="Steam\SteamInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
@@ -59,6 +61,8 @@
     <ClCompile Include="Net\RequestPool.cpp" />
     <ClCompile Include="PapyrusEventManager.cpp" />
     <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="Steam\SteamAPI.cpp" />
+    <ClCompile Include="Steam\SteamInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Libraries\SKSE\common\common.vcxproj">
@@ -72,6 +76,7 @@
     <None Include="Configuration.inl" />
     <None Include="Net\Request.inl" />
     <None Include="Papyrus Exports\SKUNet.psc" />
+    <None Include="Papyrus Exports\SKUSteam.psc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -159,10 +164,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>E:\dev\projects\Libraries\boost_1_63_0;E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-debug-static-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\dev\projects\Libraries\steamworks_sdk_140;E:\dev\projects\Libraries\boost_1_63_0;E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-debug-static-ipv6-sspi\include;E:\dev\projects\Skyrim\Libraries\SKSE\skse;E:\dev\projects\Skyrim\Libraries\SKSE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>common/IPrefix.h</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>DEBUG;_WINDLL;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DEBUG;_WINDLL;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <PostBuildEvent>

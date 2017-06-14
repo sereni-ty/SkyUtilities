@@ -11,11 +11,14 @@
 #include <mutex>
 
 namespace SKU::Net::HTTP::Config {
-  Configuration::Setting<uint32_t> HTTPMaxResponseSize(
+  Configuration::Setting<uint32_t> HTTPMaxResponseSize {
     std::string("Net.Requests.HTTP.MaxResponseSize"),
     1024 * 256,
-    [](auto &value) -> auto {return value > 1024 * 256 ? 1024 * 256 : value; }
-  );
+    [] (const uint32_t &value) -> uint32_t
+    {
+      return value > 1024 * 256 ? 1024 * 256 : value;
+    }
+  };
 }
 
 namespace SKU::Net::HTTP {

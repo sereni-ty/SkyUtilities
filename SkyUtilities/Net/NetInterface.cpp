@@ -18,41 +18,41 @@
 #include <vector>
 
 namespace SKU::Net::Config {
-  Configuration::Setting<uint32_t> PapyrusCallsPerTimeFrame(
+  Configuration::Setting<uint32_t> PapyrusCallsPerTimeFrame {
     std::string("Net.Papyrus.CallsPerTimeFrame"),
     100,
     [] (const uint32_t &value) -> uint32_t
-  {
-    return value > 100 ? 100 : value;
-  }
-  );
+    {
+      return value > 100 ? 100 : value;
+    }
+  };
 
-  Configuration::Setting<uint32_t> PapyrusMaxTransgressions(
+  Configuration::Setting<uint32_t> PapyrusMaxTransgressions {
     std::string("Net.Papyrus.MaxTransgressions"),
     3,
     [] (const uint32_t &value) -> uint32_t
-  {
-    return value > 3 ? 3 : value;
-  }
-  );
+    {
+      return value > 3 ? 3 : value;
+    }
+  };
 
-  Configuration::Setting<uint32_t> PapyrusTimeFrame(
+  Configuration::Setting<uint32_t> PapyrusTimeFrame {
     std::string("Net.Papyrus.TimeFrame"),
     1000,
     [] (const uint32_t &value) -> uint32_t
-  {
-    return value > 1000 ? 1000 : value;
-  }
-  );
+    {
+      return value > 1000 ? 1000 : value;
+    }
+  };
 
-  Configuration::Setting<long> RequestsDefaultTimeout(
+  Configuration::Setting<long> RequestsDefaultTimeout {
     std::string("Net.Requests.DefaultTimeout"),
     2500,
     [] (const long &value) -> long
-  {
-    return value > 2500 || value <= 0 ? 2500 : value;
-  }
-  );
+    {
+      return value > 2500 || value <= 0 ? 2500 : value;
+    }
+  };
 }
 
 namespace SKU::Net {

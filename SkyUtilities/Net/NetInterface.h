@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Singleton.h"
 #include "Events.h"
 #include "Serializeable.h"
 #include "Configuration.h"

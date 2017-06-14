@@ -94,6 +94,7 @@ namespace SKU {
     skse_serialization->SetLoadCallback(skse->GetPluginHandle(), OnSKSELoadGameProxy);
 
     net = std::make_unique<Net::Interface>();
+    steam = std::make_unique<Steam::Interface>();
     papyrus_event_manager = std::make_unique<PapyrusEventManager>();
 
     is_plugin_ready = skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
@@ -114,6 +115,7 @@ namespace SKU {
     }
 
     GetInstance()->net->OnSKSERegisterPapyrusFunctions(registry);
+    GetInstance()->steam->OnSKSERegisterPapyrusFunctions(registry);
 
     return true;
   }

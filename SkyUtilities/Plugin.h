@@ -4,6 +4,7 @@
 #include "Events.h"
 
 #include "Net/NetInterface.h"
+#include "Steam/SteamInterface.h"
 #include "PapyrusEventManager.h"
 #include "Configuration.h"
 
@@ -81,6 +82,7 @@ namespace SKU {
 
     private:
     Net::Interface::Ptr net;
+    Steam::Interface::Ptr steam;
     PapyrusEventManager::Ptr papyrus_event_manager;
     Configuration::Ptr conf;
 
