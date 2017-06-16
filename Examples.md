@@ -33,12 +33,41 @@ You can customize the values to your liking, though you can't go above these val
 
 ```papyrus
 event OnInit()
-  string profile_id = SKUSteam.CurrentSteamUserProfileID()
+  string profile_id = SKUSteam.GetSteamUserProfileID()
+  string profile_name = SKUSteam.GetSteamUserProfileName()
 
   if profile_id != ""
     Debug.Trace("Steam Profile ID: " + profile_id)
   endif
+  
+  if profile_name != ""
+    Debug.Trace("Steam Profile Name: " + profile_name)
+  endif
 endEvent
+```
+
+### Cycling through the Achievements
+
+```papyrus
+Debug.Trace("Cycling through Achievements: ")
+
+int current_achievement_id = SKUSteam.GetNextAchievementID(-1)
+
+while current_achievement_id >= 0
+  string name = SKUSteam.GetAchievementName(current_achievement_id)
+  string desc = SKUSteam.GetAchievementDescription(name)
+  bool status = SKUSteam.GetAchievementStatus(name)
+
+  string status_str = ""
+
+  if status == true
+    status_str = " (done)"
+  endIf
+
+  Debug.Trace("Achievement #"+ current_achievement_id + " '" + name + "': " + desc + status_str)
+
+  current_achievement_id = SKUSteam.GetNextAchievementID(current_achievement_id)
+endWhile
 ```
 
 ## Net
