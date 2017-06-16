@@ -9,6 +9,7 @@ namespace SKU::Steam {
 
   using SteamUserAPI_Ptr = ISteamUser*(*)();
   using SteamFriendsAPI_Ptr = ISteamFriends*(*)();
+  using SteamStatsAPI_Ptr = ISteamUserStats*(*)();
 
   class SteamAPI
   {
@@ -20,6 +21,7 @@ namespace SKU::Steam {
     ~SteamAPI();
 
     inline bool IsValid();
+    inline bool IsLoaded();
 
     private:
     inline void Unload();
@@ -32,6 +34,7 @@ namespace SKU::Steam {
 
     public:
     SteamUserAPI_Ptr GetUser;
+    SteamStatsAPI_Ptr GetStats;
     SteamFriendsAPI_Ptr GetFriends;
   };
 }

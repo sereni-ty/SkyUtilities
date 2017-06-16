@@ -25,7 +25,14 @@ namespace SKU::Steam {
     ~Interface();
 
     public:
-    static BSFixedString CurrentSteamUserProfileID(StaticFunctionTag*);
+    static BSFixedString GetUserProfileID(StaticFunctionTag*);
+    static BSFixedString GetUserProfileName(StaticFunctionTag*);
+
+    static long GetNextAchievementID(StaticFunctionTag*, long i);
+
+    static BSFixedString GetAchievementName(StaticFunctionTag*, long i);
+    static bool GetAchievementStatus(StaticFunctionTag*, BSFixedString name);
+    static BSFixedString GetAchievementDescription(StaticFunctionTag*, BSFixedString name);
 
     // IEventHandler
     //

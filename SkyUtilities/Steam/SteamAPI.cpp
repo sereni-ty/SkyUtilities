@@ -4,26 +4,27 @@ namespace SKU::Steam {
   void SteamAPI::DeployAppIDFile()
   {
     std::ofstream appidfs("steam_appid.txt");
-    appidfs << "72850";
+
+    if (appidfs.is_open() == true)
+    {
+      appidfs << "72850";
+    }
   }
 
   SteamAPI::SteamAPI()
   {
     hSteamDLL = LoadLibraryA("steam_api.dll");
 
-    if (IsValid())
+    if (IsValid() == true)
     {
       Init = (SteamAPIInit_Ptr) GetProcAddress(hSteamDLL, "SteamAPI_Init");
       Shutdown = (SteamAPIShutdown_Ptr) GetProcAddress(hSteamDLL, "SteamAPI_Shutdown");
 
       GetUser = (SteamUserAPI_Ptr) GetProcAddress(hSteamDLL, "SteamUser");
+      GetStats = (SteamStatsAPI_Ptr) GetProcAddress(hSteamDLL, "SteamUserStats");
       GetFriends = (SteamFriendsAPI_Ptr) GetProcAddress(hSteamDLL, "SteamFriends");
 
-      if (Init == nullptr
-        || Shutdown == nullptr
-        || GetUser == nullptr
-        || GetFriends == nullptr
-        || false == Init())
+      if (IsLoaded() == false || false == Init())
       {
         Unload();
       }
@@ -44,9 +45,22 @@ namespace SKU::Steam {
     return hSteamDLL != nullptr;
   }
 
+  inline bool SteamAPI::IsLoaded()
+  {
+    return GetUser != nullptr
+      && GetStats != nullptr
+      && GetFriends != nullptr
+      && Init != nullptr
+      && Shutdown != nullptr;
+  }
+
   inline void SteamAPI::Unload()
   {
     FreeLibrary(hSteamDLL);
     hSteamDLL = nullptr;
+
+    GetUser = nullptr;
+    GetStats = nullptr;
+    GetFriends = nullptr;
   }
 }
