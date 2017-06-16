@@ -35,9 +35,7 @@ namespace SKU::Steam { // TODO: achievements buffern..
 
     Achievement(std::string n, std::string d, bool s)
       : name(n), description(d), status(s)
-    {
-      Plugin::Log(LOGL_VERBOSE, "Achievement: %s ('%s'): %s", n.c_str(), d.c_str(), s ? "done" : "undone");
-    }
+    {}
   };
 
   std::vector<Achievement> achievements;
@@ -80,7 +78,7 @@ namespace SKU::Steam { // TODO: achievements buffern..
     size_t num_achievements = api.GetStats()->GetNumAchievements();
     achievements.resize(num_achievements);
 
-    Plugin::Log(LOGL_INFO, "Steam: %d achievements..", achievements.capacity());
+    Plugin::Log(LOGL_INFO, "Steam: Loading %d achievements..", achievements.capacity());
 
     for (size_t i = 0; i < num_achievements; i++)
     {
