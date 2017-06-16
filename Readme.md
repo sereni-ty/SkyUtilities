@@ -12,7 +12,7 @@ There aren't much features at the moment but I'm getting there.
 + (Basic) HTTP requests (both GET and POST)
 + URL en/decoding 
 + Mod information retrieval from Nexus (non-adult) or LoversLab (via mod id).
-+ Steam User Profile ID acquiral
++ Usage of the Steam API: Profile ID, Profile Name, Achievements
 + Configuration (Readable: JSON) 
   + With restrictions so as to not abuse this plugin
 
