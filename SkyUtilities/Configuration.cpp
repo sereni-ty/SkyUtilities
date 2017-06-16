@@ -25,32 +25,19 @@ namespace SKU {
       return;
     }
 
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Loading (%s)..", path.c_str());
-
     try
     {
       boost::property_tree::read_json(confs, json_values);
     }
-    catch (boost::property_tree::json_parser_error &e)
+    catch (boost::property_tree::json_parser_error)
     {
-      Plugin::Log(LOGL_VERBOSE, "Configuration: Failed parsing (%s)", e.what());
     }
-
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Ready (%d).", json_values.size());
   }
 
   void Configuration::Save()
   {
-    Plugin::Log(LOGL_VERBOSE, "Configuration: Attempting to save (%s).", path.c_str());
-
-    if (json_values.empty() == true)
+    if (path.empty() == true || json_values.empty() == true)
     {
-      return;
-    }
-
-    if (path.empty() == true)
-    {
-      Plugin::Log(LOGL_VERBOSE, "Configuration: Invalid path. Unable to save.");
       return;
     }
 
@@ -58,7 +45,6 @@ namespace SKU {
 
     if (confs.is_open() == false)
     {
-      Plugin::Log(LOGL_VERBOSE, "Configuration: Couldn't open configuration file to save data.");
       return;
     }
 
@@ -66,9 +52,8 @@ namespace SKU {
     {
       boost::property_tree::write_json(confs, json_values);
     }
-    catch (boost::property_tree::json_parser_error &e)
+    catch (boost::property_tree::json_parser_error)
     {
-      Plugin::Log(LOGL_VERBOSE, "Configuration: Failed writing configuration  (%s).", e.what());
     }
   }
 }

@@ -25,8 +25,6 @@ enum
   LOGL_VERBOSE
 };
 
-#define LOGLEVEL LOGL_VERBOSE
-
 #define PLUGIN_RELEASE_VERSION_MAJOR	0
 #define PLUGIN_RELEASE_VERSION_MINOR	2
 
@@ -46,6 +44,10 @@ enum
 #define PLUGIN_SERIALIZATION_VERSION 1
 
 namespace SKU {
+  namespace Config {
+    extern Configuration::Setting<std::string> LogLevel;
+  }
+
   class Plugin : public Singleton<Plugin>
   {
     IS_SINGLETON_CLASS(Plugin)

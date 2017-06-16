@@ -21,22 +21,52 @@
 #include <mutex>
 #include <list>
 
-namespace SKU {
-  Plugin::Plugin()
-    : is_game_ready(false), is_plugin_ready(false)
-  {
-    Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
-
-#if defined(DEBUG)
-    Log(LOGL_INFO, "Waiting for Debugger to attach..");
-
-    while (IsDebuggerPresent() == FALSE)
+namespace SKU::Config {
+  Configuration::Setting<std::string> LogLevel {
+    std::string("LogLevel"),
+    std::string("verbose"),
+    [] (const std::string &value) -> std::string
     {
-      Sleep(100);
+      if (value == "verbose" || value == "info" || value == "detailed")
+      {
+        return value;
+      }
+
+      return "verbose";
+    }
+  };
+
+  inline uint32_t LogLevelToUInt(const std::string &log_level_str)
+  {
+    if (log_level_str == "verbose")
+    {
+      return LOGL_VERBOSE;
     }
 
-    Log(LOGL_INFO, "Debugger attached.");
-#endif
+    if (log_level_str == "info")
+    {
+      return LOGL_INFO;
+    }
+
+    if (log_level_str == "detailed")
+    {
+      return LOGL_DETAILED;
+    }
+
+    return LOGL_VERBOSE;
+  }
+}
+
+namespace SKU {
+  Plugin::Plugin()
+    : is_game_ready(false)
+    , is_plugin_ready(false)
+    , conf(nullptr)
+    , net(nullptr)
+    , steam(nullptr)
+    , papyrus_event_manager(nullptr)
+  {
+    GetConfiguration()->SetInitial(Config::LogLevel);
   }
 
   Plugin::~Plugin()
@@ -73,6 +103,19 @@ namespace SKU {
     {
       return false;
     }
+
+    Log(LOGL_INFO, "%s (%s)\n", PLUGIN_NAME, PLUGIN_RELEASE_VERSION_STR);
+
+#if defined(DEBUG)
+    Log(LOGL_INFO, "Waiting for Debugger to attach..");
+
+    while (IsDebuggerPresent() == FALSE)
+    {
+      Sleep(100);
+    }
+
+    Log(LOGL_INFO, "Debugger attached.");
+#endif
 
     SKSEPapyrusInterface *skse_papyrus = reinterpret_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
     SKSEMessagingInterface *skse_messaging = reinterpret_cast<SKSEMessagingInterface*>(skse->QueryInterface(kInterface_Messaging));
@@ -316,8 +359,12 @@ namespace SKU {
 
     va_list args;
     std::string cfmt;
+    std::string log_level_str;
 
-    if (level > LOGLEVEL)
+    GetInstance()->GetConfiguration()->Get<std::string>(Config::LogLevel, log_level_str);
+    uint32_t log_level = Config::LogLevelToUInt(log_level_str);
+
+    if (level > log_level)
     {
       return;
     }
@@ -347,6 +394,8 @@ extern "C"
 {
   bool __declspec(dllexport) SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
   {
+    gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
+
     return SKU::Plugin::GetInstance()->OnSKSEQuery(skse, info);
   }
 
@@ -362,11 +411,6 @@ extern "C"
   {
     switch (fdwReason)
     {
-      case DLL_PROCESS_ATTACH:
-      {
-        gLog.OpenRelative(CSIDL_MYDOCUMENTS, PLUGIN_RELATIVE_LOG_PATH);
-      } break;
-
       case DLL_PROCESS_DETACH:
       {
         SKU::Plugin::GetInstance()->Stop();
