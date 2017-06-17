@@ -6,6 +6,8 @@
 
 #include <string>
 #include <regex>
+#include <future>
+#include <thread>
 
 namespace SKU::Misc::StringUtil {
   Interface::Interface()
@@ -20,15 +22,34 @@ namespace SKU::Misc::StringUtil {
     std::smatch m;
     std::string s = str.data;
 
-    while (std::regex_search(s, m, std::regex(pattern.data)) == true)
-    {
-      for (auto match : m)
-      {
-        pres.push_back(match.str().c_str());
-      }
+    bool stop = false;
 
-      s = m.suffix().str();
-    }
+    std::future<void> task = std::async([&] ()
+    {
+      try
+      {
+        while (stop == false && std::regex_search(s, m, std::regex(pattern.data)) == true)
+        {
+          for (auto match : m)
+          {
+            pres.push_back(match.str().c_str());
+          }
+
+          s = m.suffix().str();
+        }
+      }
+      catch (std::exception &e)
+      {
+        Plugin::Log(LOGL_VERBOSE, "StringUtil: Exception on RegexSearch (%s).",
+          e.what());
+      }
+    });
+
+    uint32_t blocking_limit;
+    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(Config::InterfaceProcessingTimeLimit, blocking_limit);
+
+    task.wait_for(std::chrono::milliseconds(blocking_limit));
+    stop = true;
 
     return pres;
   }
@@ -39,26 +60,61 @@ namespace SKU::Misc::StringUtil {
     std::smatch m;
     std::string s = str.data;
 
-    if (std::regex_match(s, m, std::regex(pattern.data)) == true)
+    std::future<void> task = std::async([&] ()
     {
-      for (auto match : m)
+      try
       {
-        pres.push_back(match.str().c_str());
+        if (std::regex_match(s, m, std::regex(pattern.data)) == true)
+        {
+          for (auto match : m)
+          {
+            pres.push_back(match.str().c_str());
+          }
+        }
       }
-    }
+      catch (std::exception &e)
+      {
+        Plugin::Log(LOGL_VERBOSE, "StringUtil: Exception on RegexMatch (%s).",
+          e.what());
+      }
+    });
+
+    uint32_t blocking_limit;
+    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(Config::InterfaceProcessingTimeLimit, blocking_limit);
+
+    Plugin::Log(LOGL_VERBOSE, "StringUtil: %dms blocking limit", blocking_limit);
+
+    task.wait_for(std::chrono::milliseconds(blocking_limit));
 
     return pres;
   }
+
   BSFixedString Interface::RegexReplace(StaticFunctionTag*, BSFixedString pattern, BSFixedString replacement, BSFixedString str)
   {
     BSFixedString pres;
 
-    std::string result = std::regex_replace(str.data, std::regex(pattern.data), replacement.data);
-
-    if (result.empty() == false)
+    std::future<void> task = std::async([&] ()
     {
-      pres = BSFixedString(result.c_str());
-    }
+      try
+      {
+        std::string result = std::regex_replace(str.data, std::regex(pattern.data), replacement.data);
+
+        if (result.empty() == false)
+        {
+          pres = BSFixedString(result.c_str());
+        }
+      }
+      catch (std::exception &e)
+      {
+        Plugin::Log(LOGL_VERBOSE, "StringUtil: Exception on RegexReplace (%s).",
+          e.what());
+      }
+    });
+
+    uint32_t blocking_limit;
+    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(Config::InterfaceProcessingTimeLimit, blocking_limit);
+
+    task.wait_for(std::chrono::milliseconds(blocking_limit));
 
     return pres;
   }

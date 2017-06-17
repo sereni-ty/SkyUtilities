@@ -1,6 +1,8 @@
 template<typename T>
 bool Configuration::Get(const Configuration::Setting<T> &setting, T &value)
 {
+  Load();
+
   boost::optional<T> json_value = json_values.get_optional<T>(setting.key);
 
   if (json_value.is_initialized() == false)
@@ -17,6 +19,13 @@ bool Configuration::Get(const Configuration::Setting<T> &setting, T &value)
 template<typename T>
 void Configuration::Set(const Setting<T> &setting, const T &value)
 {
+  boost::optional<T> json_value = json_values.get_optional<T>(setting.key);
+
+  if (json_value.is_initialized() == true && json_value.get() == value)
+  {
+    return;
+  }
+
   json_values.put<T>(setting.key, value);
 
   Save();
@@ -25,7 +34,7 @@ void Configuration::Set(const Setting<T> &setting, const T &value)
 template<typename T>
 void Configuration::SetInitial(const Setting<T> &setting)
 {
-  if (json_values.find(setting.key) != json_values.not_found())
+  if (json_values.get_optional<T>(setting.key).is_initialized() == true)
   {
     return;
   }

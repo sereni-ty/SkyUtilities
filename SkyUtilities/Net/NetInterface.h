@@ -12,14 +12,11 @@
 struct StaticFunctionTag;
 class TESForm;
 
-namespace SKU::Net {
-  namespace Config {
-    extern Configuration::Setting<uint32_t> PapyrusCallsPerTimeFrame;
-    extern Configuration::Setting<uint32_t> PapyrusMaxTransgressions;
-    extern Configuration::Setting<uint32_t> PapyrusTimeFrame;
-    extern Configuration::Setting<long> RequestsDefaultTimeout;
-  }
+namespace SKU::Config {
+  extern Configuration::Setting<long> RequestsDefaultTimeout;
+}
 
+namespace SKU::Net {
   class Interface : public IEventHandler
   {
     friend class Plugin;

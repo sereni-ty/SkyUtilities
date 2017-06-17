@@ -1,4 +1,5 @@
 #include "SteamAPI.h"
+#include "Plugin.h"
 
 namespace SKU::Steam {
   void SteamAPI::DeployAppIDFile()

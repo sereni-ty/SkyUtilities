@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -52,6 +53,8 @@ namespace SKU {
     private:
     boost::property_tree::ptree json_values;
     std::string path;
+    __time64_t last_changed;
+    std::mutex mtx_accessor;
   };
 
 # include "Configuration.inl"

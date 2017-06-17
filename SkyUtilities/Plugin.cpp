@@ -23,7 +23,7 @@
 
 namespace SKU::Config {
   Configuration::Setting<std::string> LogLevel {
-    std::string("LogLevel"),
+    std::string("Log.Level"),
     std::string("verbose"),
     [] (const std::string &value) -> std::string
     {
@@ -33,6 +33,42 @@ namespace SKU::Config {
       }
 
       return "verbose";
+    }
+  };
+
+  Configuration::Setting<uint32_t> InterfaceProcessingTimeLimit { // TODO: Currently only implemented in SteamAPI
+    std::string("Interface.All.Processing.TimeLimit"),
+    500,
+    [] (const uint32_t &value) -> uint32_t
+    {
+      return (value > 500) ? 500 : value;
+    }
+  };
+
+  Configuration::Setting<uint32_t> CallsAllowedPerTimeLimit {
+    std::string("Papyrus.InterfaceCalls.AllowedPerTimeLimit"),
+    100,
+    [] (const uint32_t &value) -> uint32_t
+    {
+      return value > 100 ? 100 : value;
+    }
+  };
+
+  Configuration::Setting<uint32_t> AllowedTransgressions {
+    std::string("Papyrus.InterfaceCalls.AllowedTransgressions"),
+    3,
+    [] (const uint32_t &value) -> uint32_t
+    {
+      return value > 3 ? 3 : value;
+    }
+  };
+
+  Configuration::Setting<uint32_t> TransgressionCheckTimeLimit {
+    std::string("Papyrus.InterfaceCalls.AllowanceTimeLimit"),
+    1000,
+    [] (const uint32_t &value) -> uint32_t
+    {
+      return value > 1000 ? 1000 : value;
     }
   };
 
@@ -68,6 +104,12 @@ namespace SKU {
     , papyrus_event_manager(nullptr)
   {
     GetConfiguration()->SetInitial(Config::LogLevel);
+
+    conf->SetInitial(Config::InterfaceProcessingTimeLimit);
+
+    conf->SetInitial(Config::CallsAllowedPerTimeLimit);
+    conf->SetInitial(Config::AllowedTransgressions);
+    conf->SetInitial(Config::TransgressionCheckTimeLimit);
   }
 
   Plugin::~Plugin()

@@ -6,11 +6,10 @@
 #include "SKSE/PapyrusNativeFunctions.h"
 
 #include <string>
-#include <mutex>
 #include <thread>
 #include <future>
 
-namespace SKU::Steam::Config {
+namespace SKU::Config {
   Configuration::Setting<bool> SteamAPIEnabled {
     std::string("SteamAPI.Enabled"),
     true,
@@ -41,7 +40,6 @@ namespace SKU::Steam {
   std::vector<Achievement> achievements;
   std::map<std::string, long> achievement_indices;
 
-  std::mutex achievement_retrieval_mtx;
   std::future<long> achievement_retrieval_startup_future;
 
   inline bool IsSteamAPIAccessible(SteamAPI &api)
@@ -60,8 +58,6 @@ namespace SKU::Steam {
 
   inline long RetrieveAchievements()
   {
-    std::unique_lock<std::mutex> scope_lock(achievement_retrieval_mtx);
-
     if (achievements.empty() == false)
     {
       return achievements.size();
@@ -72,34 +68,46 @@ namespace SKU::Steam {
 
     if (IsSteamAPIAccessible(api) == false)
     {
-      return -1;
+      return InvalidAchievementID;
     }
 
-    size_t num_achievements = api.GetStats()->GetNumAchievements();
-    achievements.resize(num_achievements);
-
-    Plugin::Log(LOGL_INFO, "Steam: Loading %d achievements..", achievements.capacity());
-
-    for (size_t i = 0; i < num_achievements; i++)
+    try
     {
-      std::string name = api.GetStats()->GetAchievementName(i);
-      std::string description = api.GetStats()->GetAchievementDisplayAttribute(name.c_str(), "desc");
+      size_t num_achievements = api.GetStats()->GetNumAchievements();
+      achievements.resize(num_achievements);
 
-      bool status = false;
-      api.GetStats()->GetAchievement(name.c_str(), &status);
+      for (size_t i = 0; i < num_achievements; i++)
+      {
+        std::string name = api.GetStats()->GetAchievementName(i);
+        std::string description = api.GetStats()->GetAchievementDisplayAttribute(name.c_str(), "desc");
 
-      achievement_indices[name] = i;
-      achievements[i] = Achievement(name, description, status);
+        bool status = false;
+        api.GetStats()->GetAchievement(name.c_str(), &status);
+
+        achievement_indices[name] = i;
+        achievements[i] = Achievement(name, description, status);
+      }
+
+      Plugin::Log(LOGL_VERBOSE, "Steam: Loaded %d achievements..", achievements.size());
+
+      return achievements.size();
+    }
+    catch (std::exception &e)
+    {
+      Plugin::Log(LOGL_VERBOSE, "Steam: Exception occurred while getting achievements (%s)",
+        e.what());
     }
 
-    return achievements.capacity();
+    return InvalidAchievementID;
   }
 
   Interface::Interface()
   {
     Plugin::GetInstance()->GetConfiguration()->SetInitial(Config::SteamAPIEnabled);
 
-    achievement_retrieval_startup_future = std::move(std::async(RetrieveAchievements));
+    Sleep(2000); // Give SteamAPI time to startup
+
+    achievement_retrieval_startup_future = std::async(RetrieveAchievements);
   }
 
   Interface::~Interface()
@@ -131,7 +139,9 @@ namespace SKU::Steam {
 
   long Interface::GetNextAchievementID(StaticFunctionTag*, long i)
   {
-    if (RetrieveAchievements() <= 0)
+    achievement_retrieval_startup_future.wait();
+
+    if (achievements.empty() == true)
     {
       return InvalidAchievementID;
     }
@@ -148,7 +158,9 @@ namespace SKU::Steam {
 
   BSFixedString Interface::GetAchievementName(StaticFunctionTag*, long i)
   {
-    if (RetrieveAchievements() <= 0 || achievements.size() <= i || i < 0)
+    achievement_retrieval_startup_future.wait();
+
+    if (achievements.empty() == true || achievements.size() <= i || i < 0)
     {
       return "";
     }
@@ -158,7 +170,9 @@ namespace SKU::Steam {
 
   bool Interface::GetAchievementStatus(StaticFunctionTag*, BSFixedString name)
   {
-    if (RetrieveAchievements() <= 0)
+    achievement_retrieval_startup_future.wait();
+
+    if (achievements.empty() == true)
     {
       return InvalidAchievementID;
     }
@@ -175,7 +189,9 @@ namespace SKU::Steam {
 
   BSFixedString Interface::GetAchievementDescription(StaticFunctionTag*, BSFixedString name)
   {
-    if (RetrieveAchievements() <= 0)
+    achievement_retrieval_startup_future.wait();
+
+    if (achievements.empty() == true)
     {
       return "";
     }

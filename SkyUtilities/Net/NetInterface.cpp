@@ -18,35 +18,8 @@
 #include <vector>
 
 namespace SKU::Net::Config {
-  Configuration::Setting<uint32_t> PapyrusCallsPerTimeFrame {
-    std::string("Net.Papyrus.CallsPerTimeFrame"),
-    100,
-    [] (const uint32_t &value) -> uint32_t
-    {
-      return value > 100 ? 100 : value;
-    }
-  };
-
-  Configuration::Setting<uint32_t> PapyrusMaxTransgressions {
-    std::string("Net.Papyrus.MaxTransgressions"),
-    3,
-    [] (const uint32_t &value) -> uint32_t
-    {
-      return value > 3 ? 3 : value;
-    }
-  };
-
-  Configuration::Setting<uint32_t> PapyrusTimeFrame {
-    std::string("Net.Papyrus.TimeFrame"),
-    1000,
-    [] (const uint32_t &value) -> uint32_t
-    {
-      return value > 1000 ? 1000 : value;
-    }
-  };
-
   Configuration::Setting<long> RequestsDefaultTimeout {
-    std::string("Net.Requests.DefaultTimeout"),
+    std::string("Interface.Net.Requests.DefaultTimeout"),
     2500,
     [] (const long &value) -> long
     {
@@ -58,9 +31,6 @@ namespace SKU::Net::Config {
 namespace SKU::Net {
   Interface::Interface()
   {
-    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusCallsPerTimeFrame);
-    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusMaxTransgressions);
-    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::PapyrusTimeFrame);
     Plugin::GetInstance()->GetConfiguration()->SetInitial<long>(Config::RequestsDefaultTimeout);
   }
 
@@ -178,9 +148,9 @@ namespace SKU::Net {
 
       uint32_t timeframe, calls_per_timeframe, max_transgressions;
 
-      conf->Get<uint32_t>(Config::PapyrusTimeFrame, timeframe);
-      conf->Get<uint32_t>(Config::PapyrusCallsPerTimeFrame, calls_per_timeframe);
-      conf->Get<uint32_t>(Config::PapyrusMaxTransgressions, max_transgressions);
+      conf->Get<uint32_t>(SKU::Config::TransgressionCheckTimeLimit, timeframe);
+      conf->Get<uint32_t>(SKU::Config::CallsAllowedPerTimeLimit, calls_per_timeframe);
+      conf->Get<uint32_t>(SKU::Config::AllowedTransgressions, max_transgressions);
 
       if (info.last_known_calls.size() == calls_per_timeframe)
       {

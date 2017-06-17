@@ -10,9 +10,9 @@
 
 #include <mutex>
 
-namespace SKU::Net::HTTP::Config {
-  Configuration::Setting<uint32_t> HTTPMaxResponseSize {
-    std::string("Net.Requests.HTTP.MaxResponseSize"),
+namespace SKU::Config {
+  Configuration::Setting<uint32_t> HTTPResponseSizeLimit {
+    std::string("Interface.Net.Requests.HTTP.ResponseSizeLimit"),
     1024 * 256,
     [] (const uint32_t &value) -> uint32_t
     {
@@ -25,7 +25,7 @@ namespace SKU::Net::HTTP {
   RequestManager::RequestManager()
     : should_run(false), curl_handle(nullptr)
   {
-    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::HTTPMaxResponseSize);
+    Plugin::GetInstance()->GetConfiguration()->SetInitial<uint32_t>(Config::HTTPResponseSizeLimit);
 
     Initialize();
   }
@@ -510,7 +510,7 @@ namespace SKU::Net::HTTP {
 
     uint32_t max_response_size;
 
-    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(Config::HTTPMaxResponseSize, max_response_size);
+    Plugin::GetInstance()->GetConfiguration()->Get<uint32_t>(SKU::Config::HTTPResponseSizeLimit, max_response_size);
 
     if (new_size > max_response_size)
     {

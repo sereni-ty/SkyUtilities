@@ -27,9 +27,9 @@ enum
 };
 
 #define PLUGIN_RELEASE_VERSION_MAJOR	0
-#define PLUGIN_RELEASE_VERSION_MINOR	2
+#define PLUGIN_RELEASE_VERSION_MINOR	4
 
-#define PLUGIN_RELEASE_VERSION_STR	"0.3"
+#define PLUGIN_RELEASE_VERSION_STR	"0.4b"
 
 #define PLUGIN_VERSION ((PLUGIN_RELEASE_VERSION_MAJOR & 0xFF) << 24) | (PLUGIN_RELEASE_VERSION_MINOR & 0xFFFFFF)
 
@@ -47,6 +47,12 @@ enum
 namespace SKU {
   namespace Config {
     extern Configuration::Setting<std::string> LogLevel;
+
+    extern Configuration::Setting<uint32_t> InterfaceProcessingTimeLimit;
+
+    extern Configuration::Setting<uint32_t> CallsAllowedPerTimeLimit;
+    extern Configuration::Setting<uint32_t> AllowedTransgressions;
+    extern Configuration::Setting<uint32_t> TransgressionCheckTimeLimit;
   }
 
   class Plugin : public Singleton<Plugin>

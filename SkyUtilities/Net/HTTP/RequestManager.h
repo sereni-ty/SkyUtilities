@@ -14,11 +14,11 @@
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_TYPE MACRO_SWAP32('RMSU')
 #define PLUGIN_REQUEST_MANAGER_SERIALIZATION_VERSION 1
 
-namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
-  namespace Config {
-    extern Configuration::Setting<uint32_t> HTTPMaxResponseSize;
-  }
+namespace SKU::Config {
+  extern Configuration::Setting<uint32_t> HTTPResponseSizeLimit;
+}
 
+namespace SKU::Net::HTTP { // TODO: request accessor class instead of lock.. move ptr around and back on "release" <-- ctx only accessible through that one
   class RequestManager : public SKU::Net::RequestManagerBase, public ISerializeable
   {
     public:

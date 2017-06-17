@@ -15,11 +15,11 @@ struct StaticFunctionTag;
 //
 // ISteamUtils::IsOverlayEnabled
 
-namespace SKU::Steam {
-  namespace Config {
-    extern Configuration::Setting<bool> SteamAPIEnabled;
-  }
+namespace SKU::Config {
+  extern Configuration::Setting<bool> SteamAPIEnabled;
+}
 
+namespace SKU::Steam {
   class Interface : public IEventHandler
   {
     friend class Plugin;
