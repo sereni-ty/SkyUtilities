@@ -5,9 +5,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Papyrus Scripts">
-      <UniqueIdentifier>{7d58ee2e-77aa-4ea1-8a9b-c6d55193f6fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Events">
       <UniqueIdentifier>{5c432e7c-fcf0-47f9-a8ce-4130aa3c8b05}</UniqueIdentifier>
     </Filter>
@@ -25,6 +22,15 @@
     </Filter>
     <Filter Include="Interfaces\Misc">
       <UniqueIdentifier>{a70c1e5e-d945-46b2-a90f-242acf927a6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skyrim Plugin">
+      <UniqueIdentifier>{7197f18b-d9b0-4256-864a-264c9dd4f24e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skyrim Plugin\Papyrus Scripts">
+      <UniqueIdentifier>{7d58ee2e-77aa-4ea1-8a9b-c6d55193f6fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skyrim Plugin\MCM Translation Files">
+      <UniqueIdentifier>{d2df2efb-a9b3-43a7-9764-db9203d7bf0f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -136,20 +142,31 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Papyrus Exports\SKUNet.psc">
-      <Filter>Papyrus Scripts</Filter>
-    </None>
     <None Include="Net\Request.inl">
       <Filter>Interfaces\Net</Filter>
     </None>
     <None Include="Configuration.inl">
       <Filter>Internal</Filter>
     </None>
-    <None Include="Papyrus Exports\SKUSteam.psc">
-      <Filter>Papyrus Scripts</Filter>
+    <None Include="Skyrim Plugin\Scripts\Source\SKUNet.psc">
+      <Filter>Skyrim Plugin\Papyrus Scripts</Filter>
     </None>
-    <None Include="Papyrus Exports\SKUStringUtil.psc">
-      <Filter>Papyrus Scripts</Filter>
+    <None Include="Skyrim Plugin\Scripts\Source\SKUPluginMCM.psc">
+      <Filter>Skyrim Plugin\Papyrus Scripts</Filter>
     </None>
+    <None Include="Skyrim Plugin\Scripts\Source\SKUSteam.psc">
+      <Filter>Skyrim Plugin\Papyrus Scripts</Filter>
+    </None>
+    <None Include="Skyrim Plugin\Scripts\Source\SKUStringUtil.psc">
+      <Filter>Skyrim Plugin\Papyrus Scripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Skyrim Plugin\Interface\Translations\SkyUtilities_ENGLISH.txt">
+      <Filter>Skyrim Plugin\MCM Translation Files</Filter>
+    </Text>
+    <Text Include="Skyrim Plugin\Interface\Translations\SkyUtilities_GERMAN.txt">
+      <Filter>Skyrim Plugin\MCM Translation Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

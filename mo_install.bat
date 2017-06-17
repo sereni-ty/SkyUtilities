@@ -2,8 +2,10 @@
 
 @set MO_MOD_PATH=E:\Mod Organizer\mods\SkyUtilities
 @set PROJECT_PATH=E:\dev\projects\Skyrim\SKSE\SkyUtilities\SkyUtilities
+@set SKYRIM_PLUGIN_OUT_PATH=E:\dev\projects\Skyrim\SKSE\SkyUtilities\SkyUtilities\%1\Skyrim Plugin
 
-@cmd /C %PROJECT_PATH%\build_scripts.bat %1
+@cmd /C %PROJECT_PATH%\build.bat %1
 
-@xcopy /Y "%1SkyUtilities.dll" "%MO_MOD_PATH%\SKSE\Plugins\SkyUtilities.dll" 2> nul
-@xcopy /Y "%1Scripts" "%MO_MOD_PATH%\Scripts" 2> nul
+@rmdir /S /Q "%MO_MOD_PATH%\"
+@mkdir "%MO_MOD_PATH%"
+@xcopy /Y /S "%SKYRIM_PLUGIN_OUT_PATH%\*" "%MO_MOD_PATH%"

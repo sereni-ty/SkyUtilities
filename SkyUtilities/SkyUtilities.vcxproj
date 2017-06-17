@@ -77,9 +77,14 @@
   <ItemGroup>
     <None Include="Configuration.inl" />
     <None Include="Net\Request.inl" />
-    <None Include="Papyrus Exports\SKUNet.psc" />
-    <None Include="Papyrus Exports\SKUSteam.psc" />
-    <None Include="Papyrus Exports\SKUStringUtil.psc" />
+    <None Include="Skyrim Plugin\Scripts\Source\SKUNet.psc" />
+    <None Include="Skyrim Plugin\Scripts\Source\SKUPluginMCM.psc" />
+    <None Include="Skyrim Plugin\Scripts\Source\SKUSteam.psc" />
+    <None Include="Skyrim Plugin\Scripts\Source\SKUStringUtil.psc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Skyrim Plugin\Interface\Translations\SkyUtilities_ENGLISH.txt" />
+    <Text Include="Skyrim Plugin\Interface\Translations\SkyUtilities_GERMAN.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -174,8 +179,8 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)mo_install.bat" $(TargetDir)</Command>
-      <Message>Installing (Mod Organizer)..</Message>
+      <Command>"$(SolutionDir)mo_install.bat" $(ConfigurationName)</Command>
+      <Message>Building Mod..</Message>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>E:\dev\projects\Libraries\curl-7.54.0-builds\libcurl-vc17-x86-debug-static-ipv6-sspi\lib;E:\dev\projects\Libraries\boost_1_63_0\stage\lib</AdditionalLibraryDirectories>
@@ -217,10 +222,10 @@
       <AdditionalDependencies>libboost_filesystem-vc140-mt-s-1_63.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)mo_install.bat" $(TargetDir)</Command>
+      <Command>"$(SolutionDir)mo_install.bat" $(ConfigurationName)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Mod Organizer setup</Message>
+      <Message>Building Mod..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
