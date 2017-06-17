@@ -30,6 +30,7 @@
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="Lockable.h" />
+    <ClInclude Include="Misc\StringUtilInterface.h" />
     <ClInclude Include="Net\HTTP\BasicRequestEventHandler.h" />
     <ClInclude Include="Net\HTTP\ModInfoRequestEventHandler.h" />
     <ClInclude Include="Net\HTTP\RequestManager.h" />
@@ -50,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
+    <ClCompile Include="Misc\StringUtilInterface.cpp" />
     <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp" />
     <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp" />
     <ClCompile Include="PapyrusEvent.cpp" />
@@ -77,6 +79,7 @@
     <None Include="Net\Request.inl" />
     <None Include="Papyrus Exports\SKUNet.psc" />
     <None Include="Papyrus Exports\SKUSteam.psc" />
+    <None Include="Papyrus Exports\SKUStringUtil.psc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

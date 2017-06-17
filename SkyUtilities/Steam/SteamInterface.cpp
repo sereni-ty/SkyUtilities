@@ -21,7 +21,7 @@ namespace SKU::Steam::Config {
   };
 }
 
-namespace SKU::Steam { // TODO: achievements buffern..
+namespace SKU::Steam {
   const long InvalidAchievementID = -1;
 
   struct Achievement

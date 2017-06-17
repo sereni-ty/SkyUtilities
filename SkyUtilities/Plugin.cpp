@@ -64,6 +64,7 @@ namespace SKU {
     , conf(nullptr)
     , net(nullptr)
     , steam(nullptr)
+    , stringutil(nullptr)
     , papyrus_event_manager(nullptr)
   {
     GetConfiguration()->SetInitial(Config::LogLevel);
@@ -138,6 +139,7 @@ namespace SKU {
 
     net = std::make_unique<Net::Interface>();
     steam = std::make_unique<Steam::Interface>();
+    stringutil = std::make_unique<Misc::StringUtil::Interface>();
     papyrus_event_manager = std::make_unique<PapyrusEventManager>();
 
     is_plugin_ready = skse_papyrus->Register(Plugin::OnSKSERegisterPapyrusFunctionsProxy)
@@ -159,6 +161,7 @@ namespace SKU {
 
     GetInstance()->net->OnSKSERegisterPapyrusFunctions(registry);
     GetInstance()->steam->OnSKSERegisterPapyrusFunctions(registry);
+    GetInstance()->stringutil->OnSKSERegisterPapyrusFunctions(registry);
 
     return true;
   }

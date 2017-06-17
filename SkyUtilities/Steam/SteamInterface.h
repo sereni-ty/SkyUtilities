@@ -6,7 +6,14 @@
 #include <memory>
 
 struct StaticFunctionTag;
-class TESForm;
+
+// Thinking about:
+//
+// Locational Data: Country Code (ISteamUtils:::GetIPCountry)
+
+// Might be useful (Plugin):
+//
+// ISteamUtils::IsOverlayEnabled
 
 namespace SKU::Steam {
   namespace Config {

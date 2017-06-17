@@ -8,17 +8,23 @@
     <Filter Include="Papyrus Scripts">
       <UniqueIdentifier>{7d58ee2e-77aa-4ea1-8a9b-c6d55193f6fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Net">
-      <UniqueIdentifier>{89708f6a-4c78-49f1-95c5-b9b23592f7d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Net\HTTP">
-      <UniqueIdentifier>{6cb04ecb-445f-4ded-b599-2bdf7d6c794b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Events">
       <UniqueIdentifier>{5c432e7c-fcf0-47f9-a8ce-4130aa3c8b05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Steam">
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{70e40274-e69e-4caf-a71e-5d98cdce805d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces\Steam">
       <UniqueIdentifier>{26158a41-f1fd-45a1-af96-aa2cb33c8705}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces\Net">
+      <UniqueIdentifier>{89708f6a-4c78-49f1-95c5-b9b23592f7d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces\Net\HTTP">
+      <UniqueIdentifier>{6cb04ecb-445f-4ded-b599-2bdf7d6c794b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces\Misc">
+      <UniqueIdentifier>{a70c1e5e-d945-46b2-a90f-242acf927a6f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,37 +39,37 @@
     </ClInclude>
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Net\Request.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="Net\RequestManagerBase.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="Net\RequestPool.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="Net\RequestProtocolContext.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="Net\HTTP\RequestManager.h">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClInclude>
     <ClInclude Include="Net\HTTP\RequestProtocolContext.h">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClInclude>
     <ClInclude Include="Net\NetInterface.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="PapyrusEvent.h">
       <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="Net\RequestEventHandler.h">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClInclude>
     <ClInclude Include="Net\HTTP\BasicRequestEventHandler.h">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClInclude>
     <ClInclude Include="Net\HTTP\ModInfoRequestEventHandler.h">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClInclude>
     <ClInclude Include="Serializeable.h">
       <Filter>Internal</Filter>
@@ -75,40 +81,43 @@
       <Filter>Internal</Filter>
     </ClInclude>
     <ClInclude Include="Steam\SteamInterface.h">
-      <Filter>Steam</Filter>
+      <Filter>Interfaces\Steam</Filter>
     </ClInclude>
     <ClInclude Include="Steam\SteamAPI.h">
-      <Filter>Steam</Filter>
+      <Filter>Interfaces\Steam</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc\StringUtilInterface.h">
+      <Filter>Interfaces\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="Net\Request.cpp">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClCompile>
     <ClCompile Include="Net\RequestManagerBase.cpp">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClCompile>
     <ClCompile Include="Net\RequestPool.cpp">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClCompile>
     <ClCompile Include="Net\HTTP\RequestManager.cpp">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClCompile>
     <ClCompile Include="Net\HTTP\RequestProtocolContext.cpp">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClCompile>
     <ClCompile Include="Net\NetInterface.cpp">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </ClCompile>
     <ClCompile Include="PapyrusEvent.cpp">
       <Filter>Events</Filter>
     </ClCompile>
     <ClCompile Include="Net\HTTP\BasicRequestEventHandler.cpp">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClCompile>
     <ClCompile Include="Net\HTTP\ModInfoRequestEventHandler.cpp">
-      <Filter>Net\HTTP</Filter>
+      <Filter>Interfaces\Net\HTTP</Filter>
     </ClCompile>
     <ClCompile Include="PapyrusEventManager.cpp">
       <Filter>Events</Filter>
@@ -117,10 +126,13 @@
       <Filter>Internal</Filter>
     </ClCompile>
     <ClCompile Include="Steam\SteamAPI.cpp">
-      <Filter>Steam</Filter>
+      <Filter>Interfaces\Steam</Filter>
     </ClCompile>
     <ClCompile Include="Steam\SteamInterface.cpp">
-      <Filter>Steam</Filter>
+      <Filter>Interfaces\Steam</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc\StringUtilInterface.cpp">
+      <Filter>Interfaces\Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,12 +140,15 @@
       <Filter>Papyrus Scripts</Filter>
     </None>
     <None Include="Net\Request.inl">
-      <Filter>Net</Filter>
+      <Filter>Interfaces\Net</Filter>
     </None>
     <None Include="Configuration.inl">
       <Filter>Internal</Filter>
     </None>
     <None Include="Papyrus Exports\SKUSteam.psc">
+      <Filter>Papyrus Scripts</Filter>
+    </None>
+    <None Include="Papyrus Exports\SKUStringUtil.psc">
       <Filter>Papyrus Scripts</Filter>
     </None>
   </ItemGroup>
