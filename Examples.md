@@ -5,24 +5,36 @@
 
 ```json
 {
-    "Net": {
-        "Papyrus": {
-            "CallsPerTimeFrame": "100",
-            "MaxTransgressions": "3",
-            "TimeFrame": "1000"
-        },
-        "Requests": {
-            "DefaultTimeout": "2500",
-            "HTTP": {
-                "MaxResponseSize": "262144"
+    "Log": {
+        "Level": "verbose"
+    },
+    "Interface": {
+        "All": {
+            "Processing": {
+                "TimeLimit": "500"
             }
+        },
+        "Net": {
+            "Requests": {
+                "DefaultTimeout": "2500",
+                "HTTP": {
+                    "ResponseSizeLimit": "262144"
+                }
+            }
+        }
+    },
+    "Papyrus": {
+        "InterfaceCalls": {
+            "AllowedPerTimeLimit": "100",
+            "AllowedTransgressions": "3",
+            "AllowanceTimeLimit": "1000"
         }
     },
     "SteamAPI": {
         "Enabled": "true"
-    },
-    "LogLevel": "verbose"
+    }
 }
+
 ```
 
 This configuration file is automatically created on the first startup of a new game and is therefore filled with default values. SkyUtilites does not change any of these values. 
