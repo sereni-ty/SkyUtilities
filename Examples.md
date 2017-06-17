@@ -5,24 +5,36 @@
 
 ```json
 {
-    "Net": {
-        "Papyrus": {
-            "CallsPerTimeFrame": "100",
-            "MaxTransgressions": "3",
-            "TimeFrame": "1000"
-        },
-        "Requests": {
-            "DefaultTimeout": "2500",
-            "HTTP": {
-                "MaxResponseSize": "262144"
+    "Log": {
+        "Level": "verbose"
+    },
+    "Interface": {
+        "All": {
+            "Processing": {
+                "TimeLimit": "500"
             }
+        },
+        "Net": {
+            "Requests": {
+                "DefaultTimeout": "2500",
+                "HTTP": {
+                    "ResponseSizeLimit": "262144"
+                }
+            }
+        }
+    },
+    "Papyrus": {
+        "InterfaceCalls": {
+            "AllowedPerTimeLimit": "100",
+            "AllowedTransgressions": "3",
+            "AllowanceTimeLimit": "1000"
         }
     },
     "SteamAPI": {
         "Enabled": "true"
-    },
-    "LogLevel": "verbose"
+    }
 }
+
 ```
 
 This configuration file is automatically created on the first startup of a new game and is therefore filled with default values. SkyUtilites does not change any of these values. 
@@ -94,6 +106,47 @@ Result:
 ![Net: Mod Retrieval Console Output][net-mod-ret-con-out]
 
 Regarding the _ADULT-ONLY_ output, see [SKUNet Papyrus Source][repo_net_psc_link]
+
+## StringUtil
+
+### Simple regular expression example
+
+```papyrus
+string test_str = "This is an example"
+  string pattern = "([^\\s$]{1,}(?:[\\s]{0,}))*"
+
+  string[] match_result = SKUStringUtil.RegexMatch(pattern, test_str)
+  string[] search_result = SKUStringUtil.RegexMatch(pattern, test_str)
+
+  int i = 0
+
+  Debug.Trace("RegEx: /" + pattern + "/ matching '" + test_str + "': ")
+
+  if match_result.Length == 0
+    Debug.Trace("RegEx: No matches.")
+  else
+    while i < match_result.Length
+      Debug.Trace("Match #" + i + ": " + match_result[i])
+      i += 1
+    endWhile
+  endif
+
+  Debug.Trace("RegEx: /" + pattern + "/ searching '" + test_str + "': ")
+
+  if search_result.Length == 0
+    Debug.Trace("RegEx: No matches.")
+  else
+    i = 0
+    while i < search_result.Length
+      Debug.Trace("Match #" + i + ": " + search_result[i])
+      i += 1
+    endWhile
+  endIf
+
+  pattern = "an example"
+  string replacement = "madness"
+  Debug.Trace("RegEx: /" + pattern + "/ replacing '" + test_str + "': " + SKUStringUtil.RegexReplace(pattern, replacement, test_str))
+```
 
 [net-mod-ret-con-out]: http://i.imgur.com/quLfmcO.png
 [repo_net_psc_link]: https://github.com/sereni-ty/SkyUtilities/blob/master/SkyUtilities/Papyrus%20Exports/SKUNet.psc#L23
