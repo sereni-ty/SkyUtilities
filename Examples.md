@@ -20,7 +20,8 @@
     },
     "SteamAPI": {
         "Enabled": "true"
-    }
+    },
+    "LogLevel": "verbose"
 }
 ```
 
